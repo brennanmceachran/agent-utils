@@ -1,0 +1,44 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "ralph-loop-opencode",
+  "type": "registry:item",
+  "title": "OpenCode Ralph Loop",
+  "description": "Ralph loop agent, command, and plugin for OpenCode.",
+  "meta": {
+    "concept": "ralph-loop",
+    "platform": "opencode",
+    "kind": [
+      "agent",
+      "command",
+      "plugin"
+    ]
+  },
+  "files": [
+    {
+      "path": "registry/ralph-loop/opencode/.opencode/agent/ralph.md",
+      "type": "registry:file",
+      "target": "~/.opencode/agent/ralph.md"
+    },
+    {
+      "path": "registry/ralph-loop/opencode/.opencode/command/ralph.md",
+      "type": "registry:file",
+      "target": "~/.opencode/command/ralph.md"
+    },
+    {
+      "path": "registry/ralph-loop/opencode/.opencode/plugin/ralph-loop.ts",
+      "type": "registry:file",
+      "target": "~/.opencode/plugin/ralph-loop.ts"
+    },
+    {
+      "path": "registry/ralph-loop/opencode/.opencode/ralph/ralph-utils.ts",
+      "type": "registry:file",
+      "target": "~/.opencode/ralph/ralph-utils.ts"
+    },
+    {
+      "path": "registry/ralph-loop/opencode/.opencode/types/shims.d.ts",
+      "type": "registry:file",
+      "target": "~/.opencode/types/shims.d.ts"
+    }
+  ],
+  "docs": "Restart OpenCode after installing to register the /ralph command. Targets prefixed with ~ are repo-scoped (project-root) paths."
+}

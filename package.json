@@ -1,0 +1,21 @@
+{
+  "name": "agent-utils",
+  "private": true,
+  "workspaces": ["site", ".opencode"],
+  "scripts": {
+    "dev": "bun run --cwd site dev",
+    "build": "bun run --cwd site build",
+    "start": "bun run --cwd site start",
+    "lint": "biome check .",
+    "lint:fix": "biome check . --write",
+    "format": "biome format . --write",
+    "format:check": "biome format .",
+    "mcp:build": "bun build scripts/merge-mcp.ts --outfile registry/nextjs-mcp/opencode/.opencode/bin/merge-mcp.mjs --format=esm --target=node",
+    "registry:build": "bun run mcp:build && bun run --bun scripts/build-registry.ts",
+    "registry:validate": "bun run --bun scripts/validate-registry.ts"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "jsonc-parser": "^3.3.1"
+  }
+}

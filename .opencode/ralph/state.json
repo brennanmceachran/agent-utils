@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "sessions": {
+    "ses_465defd35ffePktIbfM2rXLsAD": {
+      "enabled": false,
+      "promptPath": "prd.v1.md",
+      "maxIterations": 50,
+      "iteration": 12
+    }
+  }
+}

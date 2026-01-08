@@ -1,0 +1,20 @@
+{
+  "slug": "webresearch",
+  "name": "Web Research",
+  "summary": "OpenCode tool that runs Codex web search requests and returns structured summaries with sources.",
+  "why": [
+    "Collect authoritative sources quickly without leaving the coding flow.",
+    "Standardize research output so decisions are traceable and reviewable.",
+    "Control depth with preset quality levels for faster or deeper dives."
+  ],
+  "what": [
+    "An OpenCode custom tool that invokes the codex CLI with web_search_request enabled.",
+    "Returns a concise summary, key findings, and full source URLs."
+  ],
+  "useCases": [
+    "Validate API behavior or library changes before implementation.",
+    "Gather competitive or product research for planning docs.",
+    "Verify compliance or licensing details with cited sources."
+  ],
+  "tags": ["tool", "research", "codex", "sources", "opencode"]
+}

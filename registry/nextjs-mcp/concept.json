@@ -1,0 +1,20 @@
+{
+  "slug": "nextjs-mcp",
+  "name": "Next.js MCP",
+  "summary": "Install the Next.js DevTools MCP server for OpenCode.",
+  "why": [
+    "Expose dev-server diagnostics to OpenCode agents.",
+    "Centralize MCP config with a repeatable install flow.",
+    "Keep MCP config consistent across projects."
+  ],
+  "what": [
+    "A reusable merge script that updates opencode.json/jsonc.",
+    "A payload file that registers next-devtools-mcp as a local MCP server."
+  ],
+  "useCases": [
+    "Enable OpenCode to read Next.js errors and logs during dev.",
+    "Query routes and page metadata directly from the dev server.",
+    "Share a consistent MCP setup across teams and repos."
+  ],
+  "tags": ["mcp", "nextjs", "opencode", "devtools", "config"]
+}

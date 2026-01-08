@@ -1,0 +1,22 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "webresearch-opencode",
+  "type": "registry:item",
+  "title": "OpenCode Web Research",
+  "description": "Web research tool that runs Codex web_search_request via OpenCode.",
+  "meta": {
+    "concept": "webresearch",
+    "platform": "opencode",
+    "kind": [
+      "tool"
+    ]
+  },
+  "files": [
+    {
+      "path": "registry/webresearch/opencode/.opencode/tool/webresearch.ts",
+      "type": "registry:file",
+      "target": "~/.opencode/tool/webresearch.ts"
+    }
+  ],
+  "docs": "Requires the `codex` CLI on PATH. Restart OpenCode after installing to register the tool. Targets prefixed with ~ are repo-scoped (project-root) paths."
+}
