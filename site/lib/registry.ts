@@ -11,6 +11,8 @@ type RegistryMeta = {
   concept?: string;
   platform?: string;
   kind?: string[];
+  postInstall?: string;
+  installPath?: string;
   [key: string]: unknown;
 };
 

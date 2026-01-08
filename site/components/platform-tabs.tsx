@@ -75,7 +75,7 @@ export function PlatformTabs({ opencodeVariant, basePath, codeBlocks = [] }: Pla
         </TabsTrigger>
       </TabsList>
 
-      <TabsContent value="opencode" className="space-y-4">
+      <TabsContent value="opencode" className="space-y-6">
         {opencodeVariant ? (
           <>
             <InstallCommand
@@ -90,12 +90,12 @@ export function PlatformTabs({ opencodeVariant, basePath, codeBlocks = [] }: Pla
                 <CardDescription>Copy these files into your repo.</CardDescription>
               </CardHeader>
               <CardContent>
-                <ul className="space-y-2 text-xs text-muted-foreground">
+                <ul className="space-y-2 text-sm text-muted-foreground">
                   {opencodeVariant.files.map((file) => (
-                    <li key={file.path}>
-                      <span className="font-medium text-foreground">{file.target}</span>
+                    <li key={file.path} className="flex flex-wrap items-center gap-2">
+                      <span className="font-mono text-foreground">{file.target}</span>
                       <span className="text-muted-foreground">
-                        {file.target ? " ← " : ""}
+                        {file.target ? " <- " : ""}
                         {file.path}
                       </span>
                     </li>
@@ -116,7 +116,7 @@ export function PlatformTabs({ opencodeVariant, basePath, codeBlocks = [] }: Pla
                         <TabsTrigger
                           key={block.id}
                           value={block.id}
-                          className="rounded-full border border-border px-4 py-1 text-xs font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                          className="border border-border/70 bg-white/80 text-muted-foreground font-mono tracking-normal data-[state=active]:bg-foreground data-[state=active]:text-background"
                         >
                           {block.label}
                         </TabsTrigger>
@@ -124,15 +124,17 @@ export function PlatformTabs({ opencodeVariant, basePath, codeBlocks = [] }: Pla
                     </TabsList>
                     {codeBlocks.map((block) => (
                       <TabsContent key={block.id} value={block.id} className="mt-4">
-                        <div className="flex items-center justify-between text-xs text-muted-foreground">
-                          <span>{block.target ?? block.path}</span>
-                          <CopyButton value={block.raw} label="Copy file" />
-                        </div>
-                        <div className="mt-3 overflow-x-auto rounded-lg border bg-white p-3">
-                          <div
-                            className="text-sm"
-                            dangerouslySetInnerHTML={{ __html: block.html }}
-                          />
+                        <div className="rounded-2xl border border-border/70 bg-white/80 p-4 shadow-sm">
+                          <div className="flex items-center justify-between text-xs text-muted-foreground">
+                            <span className="font-mono">{block.target ?? block.path}</span>
+                            <CopyButton value={block.raw} label="Copy file" />
+                          </div>
+                          <div className="mt-3 overflow-x-auto rounded-xl border border-border/60 bg-muted/40 p-4">
+                            <div
+                              className="text-[13px]"
+                              dangerouslySetInnerHTML={{ __html: block.html }}
+                            />
+                          </div>
                         </div>
                       </TabsContent>
                     ))}

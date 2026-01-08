@@ -23,7 +23,7 @@ export function CopyButton({ value, label = "Copy" }: CopyButtonProps) {
   };
 
   return (
-    <Button size="sm" variant="secondary" onClick={handleCopy}>
+    <Button size="sm" variant="outline" onClick={handleCopy}>
       {copied ? "Copied" : label}
     </Button>
   );
