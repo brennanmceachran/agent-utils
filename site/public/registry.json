@@ -20,27 +20,27 @@
       },
       "files": [
         {
-          "path": "registry/ralph-loop/opencode/.opencode/agent/ralph.md",
+          "path": "registry/ralph-loop/opencode/files/agent/ralph.md",
           "type": "registry:file",
           "target": "~/.opencode/agent/ralph.md"
         },
         {
-          "path": "registry/ralph-loop/opencode/.opencode/command/ralph.md",
+          "path": "registry/ralph-loop/opencode/files/command/ralph.md",
           "type": "registry:file",
           "target": "~/.opencode/command/ralph.md"
         },
         {
-          "path": "registry/ralph-loop/opencode/.opencode/plugin/ralph-loop.ts",
+          "path": "registry/ralph-loop/opencode/files/plugin/ralph-loop.ts",
           "type": "registry:file",
           "target": "~/.opencode/plugin/ralph-loop.ts"
         },
         {
-          "path": "registry/ralph-loop/opencode/.opencode/ralph/ralph-utils.ts",
+          "path": "registry/ralph-loop/opencode/files/ralph/ralph-utils.ts",
           "type": "registry:file",
           "target": "~/.opencode/ralph/ralph-utils.ts"
         },
         {
-          "path": "registry/ralph-loop/opencode/.opencode/types/shims.d.ts",
+          "path": "registry/ralph-loop/opencode/files/types/shims.d.ts",
           "type": "registry:file",
           "target": "~/.opencode/types/shims.d.ts"
         }
@@ -62,7 +62,7 @@
       },
       "files": [
         {
-          "path": "registry/webresearch/opencode/.opencode/tool/webresearch.ts",
+          "path": "registry/webresearch/opencode/files/tool/webresearch.ts",
           "type": "registry:file",
           "target": "~/.opencode/tool/webresearch.ts"
         }
@@ -87,12 +87,12 @@
       },
       "files": [
         {
-          "path": "registry/nextjs-mcp/opencode/.opencode/bin/merge-mcp.mjs",
+          "path": "registry/nextjs-mcp/opencode/files/bin/merge-mcp.mjs",
           "type": "registry:file",
           "target": "~/.opencode/bin/merge-mcp.mjs"
         },
         {
-          "path": "registry/nextjs-mcp/opencode/.opencode/mcp/next-devtools.json",
+          "path": "registry/nextjs-mcp/opencode/files/mcp/next-devtools.json",
           "type": "registry:file",
           "target": "~/.opencode/mcp/next-devtools.json"
         }

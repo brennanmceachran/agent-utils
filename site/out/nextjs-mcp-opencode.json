@@ -16,12 +16,12 @@
   },
   "files": [
     {
-      "path": "registry/nextjs-mcp/opencode/.opencode/bin/merge-mcp.mjs",
+      "path": "registry/nextjs-mcp/opencode/files/bin/merge-mcp.mjs",
       "type": "registry:file",
       "target": "~/.opencode/bin/merge-mcp.mjs"
     },
     {
-      "path": "registry/nextjs-mcp/opencode/.opencode/mcp/next-devtools.json",
+      "path": "registry/nextjs-mcp/opencode/files/mcp/next-devtools.json",
       "type": "registry:file",
       "target": "~/.opencode/mcp/next-devtools.json"
     }

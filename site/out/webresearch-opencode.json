@@ -13,7 +13,7 @@
   },
   "files": [
     {
-      "path": "registry/webresearch/opencode/.opencode/tool/webresearch.ts",
+      "path": "registry/webresearch/opencode/files/tool/webresearch.ts",
       "type": "registry:file",
       "target": "~/.opencode/tool/webresearch.ts"
     }
