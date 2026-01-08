@@ -16,7 +16,8 @@
           "agent",
           "command",
           "plugin"
-        ]
+        ],
+        "installPath": "ralph-loop-opencode.v1.json"
       },
       "files": [
         {
@@ -58,7 +59,8 @@
         "platform": "opencode",
         "kind": [
           "tool"
-        ]
+        ],
+        "installPath": "webresearch-opencode.v1.json"
       },
       "files": [
         {
@@ -83,7 +85,8 @@
           "config",
           "script"
         ],
-        "postInstall": "node .opencode/bin/merge-mcp.mjs"
+        "postInstall": "node .opencode/bin/merge-mcp.mjs",
+        "installPath": "nextjs-mcp-opencode.v1.json"
       },
       "files": [
         {

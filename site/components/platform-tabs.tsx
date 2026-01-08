@@ -14,6 +14,7 @@ type RegistryFile = {
 
 type RegistryMeta = {
   postInstall?: string;
+  installPath?: string;
   [key: string]: unknown;
 };
 
@@ -81,6 +82,7 @@ export function PlatformTabs({ opencodeVariant, basePath, codeBlocks = [] }: Pla
               itemName={opencodeVariant.name}
               basePath={basePath}
               postInstall={opencodeVariant.meta?.postInstall}
+              installPath={opencodeVariant.meta?.installPath}
             />
             <Card>
               <CardHeader>

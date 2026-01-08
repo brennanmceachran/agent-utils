@@ -8,9 +8,15 @@ type RegistryFile = {
   [key: string]: unknown;
 };
 
+type RegistryMeta = {
+  installPath?: string;
+  [key: string]: unknown;
+};
+
 type RegistryItem = {
   name: string;
   files: RegistryFile[];
+  meta?: RegistryMeta;
   [key: string]: unknown;
 };
 
@@ -85,6 +91,13 @@ for (const item of registry.items) {
   }
 
   assertFileExists(path.join(publicRoot, `${item.name}.json`));
+
+  if (item.meta?.installPath) {
+    if (typeof item.meta.installPath !== "string") {
+      throw new Error(`Registry item ${item.name} has non-string meta.installPath.`);
+    }
+    assertFileExists(path.join(publicRoot, item.meta.installPath));
+  }
 
   if (!Array.isArray(item.files)) {
     throw new Error(`Registry item ${item.name} is missing files[].`);

@@ -8,9 +8,15 @@ type InstallCommandProps = {
   itemName: string;
   basePath: string;
   postInstall?: string;
+  installPath?: string;
 };
 
-export function InstallCommand({ itemName, basePath, postInstall }: InstallCommandProps) {
+export function InstallCommand({
+  itemName,
+  basePath,
+  postInstall,
+  installPath,
+}: InstallCommandProps) {
   const [origin, setOrigin] = useState<string>("");
 
   useEffect(() => {
@@ -19,13 +25,14 @@ export function InstallCommand({ itemName, basePath, postInstall }: InstallComma
 
   const command = useMemo(() => {
     const normalizedBase = basePath ? basePath.replace(/\/$/, "") : "";
-    const url = `${origin || "https://your-site-url"}${normalizedBase}/${itemName}.json`;
+    const fileName = installPath || `${itemName}.json`;
+    const url = `${origin || "https://your-site-url"}${normalizedBase}/${fileName}`;
     const base = `npx shadcn@latest add ${url}`;
     if (!postInstall) {
       return base;
     }
     return `${base} && ${postInstall}`;
-  }, [origin, basePath, itemName, postInstall]);
+  }, [origin, basePath, itemName, installPath, postInstall]);
 
   return (
     <div className="rounded-xl border bg-background/80 p-4">

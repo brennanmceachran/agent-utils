@@ -17,9 +17,15 @@ type RegistryFile = {
   [key: string]: unknown;
 };
 
+type RegistryMeta = {
+  installPath?: string;
+  [key: string]: unknown;
+};
+
 type RegistryItem = {
   name: string;
   files: RegistryFile[];
+  meta?: RegistryMeta;
   [key: string]: unknown;
 };
 
@@ -91,6 +97,38 @@ function removeLegacyOutput() {
   }
 }
 
+function removeRegistryOutput() {
+  const registryOutput = path.join(publicRoot, "registry");
+  if (existsSync(registryOutput)) {
+    rmSync(registryOutput, { recursive: true, force: true });
+  }
+}
+
+function resolveInstallPath(installPath: string, itemName: string) {
+  if (!installPath.endsWith(".json")) {
+    throw new Error(
+      `Registry item ${itemName} has invalid meta.installPath (must end with .json): ${installPath}`,
+    );
+  }
+  if (installPath.includes("/") || installPath.includes("\\")) {
+    throw new Error(
+      `Registry item ${itemName} has invalid meta.installPath (must be a file name): ${installPath}`,
+    );
+  }
+  return installPath;
+}
+
+function writeInstallAlias(item: RegistryItem) {
+  const installPath = item.meta?.installPath;
+  if (!installPath) return;
+  if (typeof installPath !== "string") {
+    throw new Error(`Registry item ${item.name} has non-string meta.installPath.`);
+  }
+  const resolved = resolveInstallPath(installPath, item.name);
+  const destination = path.join(publicRoot, resolved);
+  writeJson(destination, item);
+}
+
 function copyRegistryFile(relativePath: string) {
   const sourcePath = path.resolve(repoRoot, relativePath);
   assertFileExists(sourcePath);
@@ -109,6 +147,7 @@ if (!registry || !Array.isArray(registry.items)) {
 assertNoInlineContent(registry.items);
 mkdirSync(publicRoot, { recursive: true });
 removeLegacyOutput();
+removeRegistryOutput();
 
 writeJson(path.join(publicRoot, "registry.json"), registry);
 
@@ -118,6 +157,7 @@ for (const item of registry.items) {
   }
 
   writeJson(path.join(publicRoot, `${item.name}.json`), item);
+  writeInstallAlias(item);
 
   for (const file of item.files) {
     if (!file.path || typeof file.path !== "string") {

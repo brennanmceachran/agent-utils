@@ -5,7 +5,7 @@ Utilities and registry items for OpenCode agents.
 ## Install Ralph loop (one step)
 
 ```bash
-npx shadcn@latest add https://brennanmceachran.github.io/agent-utils/ralph-loop-opencode.json
+npx shadcn@latest add https://brennanmceachran.github.io/agent-utils/ralph-loop-opencode.v1.json
 ```
 
 Restart OpenCode after install.
@@ -13,7 +13,7 @@ Restart OpenCode after install.
 ## Install Next.js MCP (OpenCode)
 
 ```bash
-npx shadcn@latest add https://brennanmceachran.github.io/agent-utils/nextjs-mcp-opencode.json && node .opencode/bin/merge-mcp.mjs
+npx shadcn@latest add https://brennanmceachran.github.io/agent-utils/nextjs-mcp-opencode.v1.json && node .opencode/bin/merge-mcp.mjs
 ```
 
 Requires Next.js 16+ and a running dev server. Restart OpenCode after install.

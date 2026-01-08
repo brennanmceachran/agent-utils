@@ -9,7 +9,8 @@
     "platform": "opencode",
     "kind": [
       "tool"
-    ]
+    ],
+    "installPath": "webresearch-opencode.v1.json"
   },
   "files": [
     {

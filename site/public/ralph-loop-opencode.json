@@ -11,7 +11,8 @@
       "agent",
       "command",
       "plugin"
-    ]
+    ],
+    "installPath": "ralph-loop-opencode.v1.json"
   },
   "files": [
     {
