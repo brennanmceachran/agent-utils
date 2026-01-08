@@ -90,7 +90,7 @@
           "target": "~/.opencode/mcp/next-devtools.json"
         }
       ],
-      "docs": "After install, run `node .opencode/bin/merge-mcp.mjs` to merge the MCP config into opencode.json/jsonc. Requires Next.js 16+. The merge script archives payloads in .opencode/mcp/.applied to avoid re-adding removed MCPs."
+      "docs": "After install, run `node .opencode/bin/merge-mcp.mjs` to merge the MCP config into opencode.json/jsonc. Requires Next.js 16+. The merge script archives payloads in .opencode/mcp/.applied to avoid re-adding removed MCPs. JSONC comments are stripped when writing."
     }
   ]
 }

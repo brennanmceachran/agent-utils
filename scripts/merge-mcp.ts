@@ -2,7 +2,6 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import { applyEdits, modify, parse } from "jsonc-parser";
 
 const args = process.argv.slice(2);
 const options = {
@@ -37,16 +36,117 @@ function detectEol(text: string) {
   return text.includes("\r\n") ? "\r\n" : "\n";
 }
 
-function parseJsonc(text: string, label: string) {
-  const errors: { error: number; offset: number; length: number }[] = [];
-  const data = parse(text, errors, { allowTrailingComma: true, disallowComments: false });
-  if (errors.length) {
-    const first = errors[0];
-    throw new Error(`Failed to parse ${label} at offset ${first.offset}.`);
+function stripJsonComments(input: string) {
+  let out = "";
+  let inString = false;
+  let stringChar = "";
+  let escaped = false;
+
+  for (let i = 0; i < input.length; i += 1) {
+    const char = input[i];
+    const next = input[i + 1];
+
+    if (inString) {
+      out += char;
+      if (escaped) {
+        escaped = false;
+      } else if (char === "\\") {
+        escaped = true;
+      } else if (char === stringChar) {
+        inString = false;
+      }
+      continue;
+    }
+
+    if (char === '"' || char === "'") {
+      inString = true;
+      stringChar = char;
+      out += char;
+      continue;
+    }
+
+    if (char === "/" && next === "/") {
+      while (i < input.length && input[i] !== "\n") {
+        i += 1;
+      }
+      out += "\n";
+      continue;
+    }
+
+    if (char === "/" && next === "*") {
+      i += 2;
+      while (i < input.length && !(input[i] === "*" && input[i + 1] === "/")) {
+        i += 1;
+      }
+      i += 1;
+      continue;
+    }
+
+    out += char;
   }
+
+  return out;
+}
+
+function stripTrailingCommas(input: string) {
+  let out = "";
+  let inString = false;
+  let stringChar = "";
+  let escaped = false;
+
+  for (let i = 0; i < input.length; i += 1) {
+    const char = input[i];
+
+    if (inString) {
+      out += char;
+      if (escaped) {
+        escaped = false;
+      } else if (char === "\\") {
+        escaped = true;
+      } else if (char === stringChar) {
+        inString = false;
+      }
+      continue;
+    }
+
+    if (char === '"' || char === "'") {
+      inString = true;
+      stringChar = char;
+      out += char;
+      continue;
+    }
+
+    if (char === ",") {
+      let j = i + 1;
+      while (j < input.length && /\s/.test(input[j] ?? "")) {
+        j += 1;
+      }
+      if (j < input.length && (input[j] === "}" || input[j] === "]")) {
+        continue;
+      }
+    }
+
+    out += char;
+  }
+
+  return out;
+}
+
+function parseJsonc(text: string, label: string) {
+  const sanitized = stripTrailingCommas(stripJsonComments(text));
+  let data: unknown;
+
+  try {
+    data = JSON.parse(sanitized);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown JSON parse error";
+    throw new Error(`Failed to parse ${label}: ${message}`);
+  }
+
   if (!data || typeof data !== "object") {
     throw new Error(`Expected ${label} to be an object.`);
   }
+
   return data as Record<string, unknown>;
 }
 
@@ -68,9 +168,8 @@ function resolvePayloads(cwd: string, explicit: string[]) {
 
   const entries = fs.readdirSync(payloadDir, { withFileTypes: true });
   return entries
-    .filter((entry) =>
-      entry.isFile() &&
-      (entry.name.endsWith(".json") || entry.name.endsWith(".jsonc")),
+    .filter(
+      (entry) => entry.isFile() && (entry.name.endsWith(".json") || entry.name.endsWith(".jsonc")),
     )
     .map((entry) => path.join(payloadDir, entry.name));
 }
@@ -118,13 +217,14 @@ function main() {
 
   const configPath = getConfigPath(cwd);
   const configExists = fs.existsSync(configPath);
-  let configText = configExists ? fs.readFileSync(configPath, "utf8") : "{}\n";
+  const configText = configExists ? fs.readFileSync(configPath, "utf8") : "{}\n";
   const eol = detectEol(configText);
 
   const configData = parseJsonc(configText, path.basename(configPath));
+  const configObject = configData as Record<string, unknown>;
   const existingMcp =
-    configData.mcp && typeof configData.mcp === "object"
-      ? (configData.mcp as Record<string, unknown>)
+    configObject.mcp && typeof configObject.mcp === "object"
+      ? (configObject.mcp as Record<string, unknown>)
       : {};
 
   const added: string[] = [];
@@ -138,22 +238,7 @@ function main() {
       continue;
     }
 
-    const edits = modify(
-      configText,
-      ["mcp", name],
-      entry,
-      {
-        formattingOptions: {
-          insertSpaces: true,
-          tabSize: 2,
-          eol,
-        },
-      },
-    );
-
-    if (edits.length) {
-      configText = applyEdits(configText, edits);
-    }
+    existingMcp[name] = entry;
 
     if (exists) {
       updated.push(name);
@@ -163,8 +248,10 @@ function main() {
   }
 
   if (added.length || updated.length) {
-    const normalized = configText.endsWith(eol) ? configText : `${configText}${eol}`;
-    fs.writeFileSync(configPath, normalized, "utf8");
+    configObject.mcp = existingMcp;
+    const normalized = JSON.stringify(configObject, null, 2);
+    const output = normalized.endsWith(eol) ? normalized : `${normalized}${eol}`;
+    fs.writeFileSync(configPath, output, "utf8");
     console.log(`Updated ${path.basename(configPath)}.`);
   } else {
     console.log(`No changes needed in ${path.basename(configPath)}.`);
