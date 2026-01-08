@@ -7,7 +7,9 @@
   "meta": {
     "concept": "webresearch",
     "platform": "opencode",
-    "kind": ["tool"],
+    "kind": [
+      "tool"
+    ],
     "installPath": "webresearch-opencode.v1.json"
   },
   "files": [

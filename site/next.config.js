@@ -1,6 +1,9 @@
 /** @type {import('next').NextConfig} */
 const path = require("node:path");
-const basePath = process.env.BASE_PATH ? `/${process.env.BASE_PATH}` : "";
+const rawBasePath =
+  process.env.BASE_PATH ?? (process.env.NODE_ENV === "production" ? "agent-utils" : "");
+const normalizedBasePath = rawBasePath.replace(/^\/+/, "").replace(/\/+$/, "");
+const basePath = normalizedBasePath ? `/${normalizedBasePath}` : "";
 
 const nextConfig = {
   output: "export",
