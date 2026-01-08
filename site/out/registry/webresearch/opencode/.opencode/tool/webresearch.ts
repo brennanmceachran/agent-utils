@@ -83,8 +83,7 @@ async function runCodex({
   const exitCode = await proc.exited;
 
   if (exitCode !== 0) {
-    const message =
-      stderr.trim() || `codex exec failed with exit code ${exitCode}`;
+    const message = stderr.trim() || `codex exec failed with exit code ${exitCode}`;
     throw new Error(message);
   }
 
