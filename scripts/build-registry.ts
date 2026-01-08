@@ -138,6 +138,27 @@ function copyRegistryFile(relativePath: string) {
   copyFileSync(sourcePath, destinationPath);
 }
 
+function withFileContents(item: RegistryItem): RegistryItem {
+  const files = item.files.map((file) => {
+    if (!file.path || typeof file.path !== "string") {
+      return file;
+    }
+
+    const sourcePath = path.resolve(repoRoot, file.path);
+    assertFileExists(sourcePath);
+    const content = readFileSync(sourcePath, "utf8");
+    return {
+      ...file,
+      content,
+    };
+  });
+
+  return {
+    ...item,
+    files,
+  };
+}
+
 const registry = readJson(registryPath);
 
 if (!registry || !Array.isArray(registry.items)) {
@@ -156,8 +177,9 @@ for (const item of registry.items) {
     throw new Error("Registry item is missing a name.");
   }
 
-  writeJson(path.join(publicRoot, `${item.name}.json`), item);
-  writeInstallAlias(item);
+  const itemWithContent = withFileContents(item);
+  writeJson(path.join(publicRoot, `${item.name}.json`), itemWithContent);
+  writeInstallAlias(itemWithContent);
 
   for (const file of item.files) {
     if (!file.path || typeof file.path !== "string") {
