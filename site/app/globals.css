@@ -120,8 +120,20 @@
     color: hsl(var(--muted-foreground));
   }
 
+  .markdown ul {
+    list-style: disc;
+  }
+
+  .markdown ol {
+    list-style: decimal;
+  }
+
   .markdown li {
     margin-top: 0.35rem;
+  }
+
+  .markdown li::marker {
+    color: hsl(var(--muted-foreground));
   }
 
   .markdown pre {
@@ -133,6 +145,14 @@
     color: hsl(var(--foreground));
     padding: 0.85rem 1rem;
     overflow-x: auto;
+  }
+
+  .markdown pre.shiki,
+  .markdown pre.mdx-pre {
+    margin: 0;
+    border: 0;
+    padding: 0;
+    background: transparent;
   }
 
   .markdown code {

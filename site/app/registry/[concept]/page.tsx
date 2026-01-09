@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { Markdown } from "@/components/markdown";
 import { PlatformTabs } from "@/components/platform-tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,6 +10,10 @@ import { buildHighlightedFiles, highlightSnippet } from "@/lib/highlight";
 import { buildInstallCommand, getBasePath, getDefaultOrigin } from "@/lib/install";
 import { getConceptBySlug, getConcepts, getItemsByConcept } from "@/lib/registry";
 import { cn } from "@/lib/utils";
+
+export const metadata = {
+  referrer: "no-referrer",
+};
 
 export const dynamicParams = false;
 
@@ -36,6 +39,11 @@ export default async function ConceptPage({
   const basePath = getBasePath();
   const codeBlocks = opencodeVariant ? await buildHighlightedFiles(opencodeVariant.files) : [];
   const content = await getConceptContent(concept.slug);
+  const Overview = content.overview;
+  const Quickstart = content.quickstart;
+  const Usage = content.usage;
+  const Examples = content.examples;
+  const Notes = content.notes;
   const origin = getDefaultOrigin(basePath);
   const installCommand = opencodeVariant
     ? buildInstallCommand({
@@ -49,10 +57,19 @@ export default async function ConceptPage({
   const installCommandHtml = installCommand ? await highlightSnippet(installCommand, "bash") : "";
 
   const toc = [
+    {
+      id: "overview",
+      label: "Overview",
+      visible: Boolean(Overview),
+    },
     { id: "install", label: "Installation", visible: true },
-    { id: "usage", label: "Usage", visible: Boolean(content.usage.trim()) },
-    { id: "examples", label: "Examples", visible: Boolean(content.examples.trim()) },
-    { id: "notes", label: "Notes", visible: Boolean(content.notes.trim()) },
+    { id: "usage", label: "Usage", visible: Boolean(Usage) },
+    {
+      id: "examples",
+      label: "Examples",
+      visible: Boolean(Examples),
+    },
+    { id: "notes", label: "Notes", visible: Boolean(Notes) },
   ].filter((item) => item.visible);
 
   return (
@@ -85,17 +102,6 @@ export default async function ConceptPage({
                 Registry
               </Link>
             </nav>
-
-            <div className="hidden md:block flex-1">
-              <div className="max-w-md">
-                <input
-                  aria-label="Search registry"
-                  className="w-full rounded-xl border border-border/70 bg-white/80 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground shadow-sm"
-                  placeholder="Search registry..."
-                  type="search"
-                />
-              </div>
-            </div>
 
             <div className="ml-auto flex items-center gap-2">
               <Button asChild variant="outline" className="hidden sm:inline-flex">
@@ -162,15 +168,12 @@ export default async function ConceptPage({
                     <p className="text-lg text-muted-foreground">{concept.summary}</p>
                   </div>
 
-                  {content.quickstart.trim() ? (
-                    <Card className="bg-white/80">
-                      <CardHeader>
-                        <CardTitle>Quick start</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <Markdown html={content.quickstart} />
-                      </CardContent>
-                    </Card>
+                  {Overview ? (
+                    <section id="overview" className="scroll-mt-24 space-y-6">
+                      <div className="markdown">
+                        <Overview />
+                      </div>
+                    </section>
                   ) : null}
                 </section>
 
@@ -200,7 +203,7 @@ export default async function ConceptPage({
                       </select>
                     </div>
                   </div>
-                  <div className="rounded-2xl bg-white/80 p-6 shadow-sm">
+                  <div className="rounded-2xl border border-border/70 bg-white/80 p-6 shadow-sm">
                     <PlatformTabs
                       opencodeVariant={opencodeVariant}
                       installCommand={installCommand}
@@ -210,7 +213,22 @@ export default async function ConceptPage({
                   </div>
                 </section>
 
-                {content.usage.trim() ? (
+                {Quickstart ? (
+                  <section className="space-y-6">
+                    <Card className="bg-white/80">
+                      <CardHeader>
+                        <CardTitle>Quick start</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="markdown">
+                          <Quickstart />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </section>
+                ) : null}
+
+                {Usage ? (
                   <section id="usage" className="scroll-mt-24 space-y-6">
                     <div className="space-y-2">
                       <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
@@ -222,13 +240,15 @@ export default async function ConceptPage({
                     </div>
                     <Card>
                       <CardContent className="pt-6">
-                        <Markdown html={content.usage} />
+                        <div className="markdown">
+                          <Usage />
+                        </div>
                       </CardContent>
                     </Card>
                   </section>
                 ) : null}
 
-                {content.examples.trim() ? (
+                {Examples ? (
                   <section id="examples" className="scroll-mt-24 space-y-6">
                     <div className="space-y-2">
                       <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
@@ -240,13 +260,15 @@ export default async function ConceptPage({
                     </div>
                     <Card>
                       <CardContent className="pt-6">
-                        <Markdown html={content.examples} />
+                        <div className="markdown">
+                          <Examples />
+                        </div>
                       </CardContent>
                     </Card>
                   </section>
                 ) : null}
 
-                {content.notes.trim() ? (
+                {Notes ? (
                   <section id="notes" className="scroll-mt-24 space-y-6">
                     <div className="space-y-2">
                       <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
@@ -258,7 +280,9 @@ export default async function ConceptPage({
                     </div>
                     <Card>
                       <CardContent className="pt-6">
-                        <Markdown html={content.notes} />
+                        <div className="markdown">
+                          <Notes />
+                        </div>
                       </CardContent>
                     </Card>
                   </section>

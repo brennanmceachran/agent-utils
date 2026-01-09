@@ -15,6 +15,7 @@
     "registry:validate": "bun run --bun scripts/validate-registry.ts"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.9.4"
+    "@biomejs/biome": "^1.9.4",
+    "remark-gfm": "^4.0.0"
   }
 }

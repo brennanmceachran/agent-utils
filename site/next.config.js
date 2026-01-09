@@ -19,4 +19,15 @@ const nextConfig = {
   reactStrictMode: true,
 };
 
-module.exports = nextConfig;
+module.exports = async () => {
+  const { default: createMDX } = await import("@next/mdx");
+  const withMDX = createMDX({
+    extension: /\.mdx$/,
+    options: {
+      remarkPlugins: ["remark-gfm"],
+      rehypePlugins: [],
+    },
+  });
+
+  return withMDX(nextConfig);
+};

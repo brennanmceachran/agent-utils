@@ -7,7 +7,7 @@ Ralph validates the prompt file. These headings are required and must be non-emp
 - Verification
 - Progress
 
-The format below is a shortened version of PRD.assistant.md. Copy it and keep it tight:
+Below is a template. Copy it and fill it out replace with your details. Leave the Progress section alone.
 
 ````md
 # PRD: <Feature name>
@@ -70,23 +70,37 @@ Tab through agents until the status reads `ralph`.
 
 ### 4) Run the loop
 
-Start with 10 iterations until you get the hang of it:
+The Ralph commands has two parameters:
+
+1. The path to the PRD file
+2. The max number of iterations to run (default 25)
+
+Start with 5 iterations until you get the hang of it:
 
 ```bash
-/ralph @docs/feature-x.prd.md 10
+/ralph @docs/feature-x.prd.md 5
 ```
 
-The second argument is the max-iterations cap.
+Then up as needed:
+
+```bash
+/ralph @docs/feature-x.prd.md 50
+```
 
 ### 5) How the loop behaves
 
-It will keep smashing your prompt back into the loop until it outputs `RALPH_DONE` or hits the max iteration cap.
-That is the point: run the happy path for hours without babysitting.
-Each iteration writes Progress back into the PRD.
+It will keep smashing your prompt back into the loop until it outputs `RALPH_DONE` or hits the max iteration cap. That is the point: run the happy path for hours without babysitting.
+Each iteration writes Progress back into the PRD. So the next turn picks up where the last left off.
 
-### 6) Steer the next iteration
+The configs auto accept everything, but stop git push and attemp to stop any destructive actions.
 
-Queue a message in OpenCode. It will be inserted into the next loop turn.
+### 6) Need to steer every once and a while?
+
+Because this is in Opencode UI, you can interact with the loop while it's running.
+
+Just type a message and hit enter. OpenCode will insert it at the next available moment nudging the agent in the right direction.
+
+However, I find the models _eventually_ get there so try to resist the urg.
 
 ### 7) Stop the loop
 
