@@ -1,3 +1,5 @@
+import type { Code, Html, Parent, Root } from "mdast";
+
 import { remark } from "remark";
 import remarkGfm from "remark-gfm";
 import remarkHtml from "remark-html";
@@ -6,25 +8,16 @@ import { visit } from "unist-util-visit";
 
 const THEME = "vitesse-light";
 
-type CodeNode = {
-  type: "code";
-  lang?: string | null;
-  value: string;
-};
-
-type ParentNode = {
-  children: Array<CodeNode | { type: string; value?: string }>;
-};
-
 function remarkShiki() {
-  return async (tree: ParentNode) => {
+  return async (tree: Root) => {
     const tasks: Promise<void>[] = [];
-    visit(tree, "code", (node: CodeNode, index, parent) => {
+    visit(tree, "code", (node: Code, index, parent: Parent | null | undefined) => {
       if (!parent || typeof index !== "number") return;
       const lang = node.lang || "text";
       tasks.push(
         codeToHtml(node.value, { lang, theme: THEME }).then((html) => {
-          parent.children[index] = { type: "html", value: html };
+          const htmlNode: Html = { type: "html", value: html };
+          parent.children[index] = htmlNode;
         }),
       );
     });
