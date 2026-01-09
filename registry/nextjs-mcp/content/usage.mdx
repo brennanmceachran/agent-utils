@@ -1,23 +1,31 @@
-### 1) Install the payload files
-Copy the MCP payload and merge script into your repo:
-- `.opencode/mcp/next-devtools.json`
-- `.opencode/bin/merge-mcp.mjs`
+### 1) Set expectations in your agent instructions
 
-### 2) Merge into OpenCode config
-Run the merge script from your repo root:
+Add a short note to your agent instructions (for example AGENTS.md or your OpenCode agent file) so it always uses MCP and docs:
 
-```bash
-node .opencode/bin/merge-mcp.mjs
+```md
+When working on a Next.js project:
+- call init at the start of the session
+- call nextjs_index before making changes
+- use nextjs_docs for Next.js questions
+- verify UI changes with browser tools
 ```
 
-This updates `opencode.json` or `opencode.jsonc` with the MCP server entry.
+### 2) Start with runtime reality
 
-### 3) Start Next.js dev server
-Next.js exposes MCP at `/_next/mcp` while the dev server runs:
+- Ask for `get_errors` and `get_routes` before touching code.
+- Use `get_page_metadata` when you are unsure what a route renders.
 
-```bash
-bun dev
-```
+### 3) Use the browser for anything visual
 
-### 4) Use MCP diagnostics
-Query tools like get_errors, get_logs, and get_routes directly from OpenCode.
+- Ask for a screenshot and console errors after UI changes.
+- When bugs only show in the browser, use Playwright to reproduce.
+- Example: "Open /, take a screenshot, and suggest UI improvements."
+
+### 4) Keep docs and upgrades close
+
+- When you hit a Next.js API question, ask the agent to query official docs.
+- Use the upgrade and cache component helpers when you are migrating.
+
+### 5) Keep the loop tight
+
+After each fix, re-check errors and verify the page again.

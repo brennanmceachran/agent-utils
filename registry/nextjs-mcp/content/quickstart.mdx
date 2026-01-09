@@ -1,14 +1,24 @@
 **What this gives you**
+
 - Hooks OpenCode into the Next.js dev server MCP endpoint (`/_next/mcp`).
 - Lets you read errors, logs, and routes without leaving the terminal.
-- Adds `next-devtools-mcp` to opencode.json/jsonc with a repeatable merge.
+- Adds `next-devtools-mcp` to `opencode.json` / `opencode.jsonc`.
 
-**Try it**
-1. Install the files from this registry.
-2. Merge the MCP payload:
+**Quickstart**
+
+1. Install using the single command in the Install section above.
+
+Manual install: add the contents of `.opencode/mcp/next-devtools.json` under `mcp` in `opencode.json` or `opencode.jsonc`.
+
+2. Start your dev server (the MCP endpoint only exists while it is running):
 
 ```bash
-node .opencode/bin/merge-mcp.mjs
+npm run dev
 ```
 
-3. Start your dev server and query MCP tools (get_errors, get_logs, get_routes).
+3. Restart OpenCode so it reloads MCP config.
+4. Ask your agent:
+
+- "Show me current Next.js errors"
+- "List my routes"
+- "Open the app and take a screenshot of /"

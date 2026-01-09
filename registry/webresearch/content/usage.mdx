@@ -1,20 +1,25 @@
-### 1) Frame the decision
-State what you are trying to decide or ship. Put that in the `reason` field so the summary stays focused. The tool runs codex web_search_request under the hood.
+### 1) Use it when you need freshness or unfamiliar context
 
-### 2) Write the queries
-Use multiple queries separated by new lines or semicolons to cover edge cases:
+- New framework features, breaking changes, or updated docs.
+- Libraries you have not touched in a while.
+- Claims in blog posts that need verification.
 
-```yaml
-query: "Next.js MCP guide; next-devtools-mcp repo; Next.js 16 MCP endpoint"
-```
+### 2) Ask for decision-ready output
 
-### 3) Add context and depth
-Provide versions, constraints, or must-read sources:
+- "Summarize, list caveats, and cite sources."
+- "Call out assumptions and conflicting sources."
+- "Give me a recommendation with tradeoffs."
 
-```yaml
-additional_context: "We are on Next.js 16.0.0; need official docs and repo links"
-quality: deep
-```
+### 3) Give constraints up front
 
-### 4) Capture output with citations
-Paste the summary and sources into your design notes or PR description. If sources conflict, re-run with a narrower follow-up query.
+- Versions, environments, and what counts as a trusted source.
+- The exact decision you need to make.
+
+### 4) Fuse the results back into your work
+
+- Pull key quotes or links into your PRD or PR.
+- Re-run with a narrower prompt if the sources disagree.
+
+### 5) Keep it conversational
+
+You can just say: "Research this if you are not sure" and the tool will kick in.

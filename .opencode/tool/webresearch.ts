@@ -83,7 +83,8 @@ async function runCodex({
   const exitCode = await proc.exited;
 
   if (exitCode !== 0) {
-    const message = stderr.trim() || `codex exec failed with exit code ${exitCode}`;
+    const message =
+      stderr.trim() || `codex exec failed with exit code ${exitCode}`;
     throw new Error(message);
   }
 
@@ -97,23 +98,23 @@ export default tool({
     reason: tool.schema
       .string()
       .describe(
-        "Describe the core reason you’re reaching for web search and the decision or output you’re aiming for.",
+        "Describe the core reason you’re reaching for web search and the decision or output you’re aiming for."
       ),
     query: tool.schema
       .string()
       .describe(
-        'List the search queries you want run; use new lines or ";" to include multiple angles in one run. Only split into parallel calls for distinct deep dives.',
+        'List the search queries you want run; use new lines or ";" to include multiple angles in one run. Only split into parallel calls for distinct deep dives.'
       ),
     additional_context: tool.schema
       .string()
       .optional()
       .describe(
-        "Add constraints or background: versions, product names, prior findings, relevant files/code, or must-include sources.",
+        "Add constraints or background: versions, product names, prior findings, relevant files/code, or must-include sources."
       ),
     quality: tool.schema
       .enum(["fast", "balanced", "deep"])
       .describe(
-        "Fast = quick scan, balanced = normal depth, deep = thorough with follow-up leads (deep can take 5-10 minutes).",
+        "Fast = quick scan, balanced = normal depth, deep = thorough with follow-up leads (deep can take 5-10 minutes)."
       ),
   },
   async execute(args) {

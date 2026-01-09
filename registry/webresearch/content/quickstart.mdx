@@ -1,12 +1,15 @@
 **What this gives you**
-- A single tool call that returns a summary, key caveats, and source URLs.
-- Preset depth controls (fast, balanced, deep).
 
-**Try it**
-```yaml
-tool: webresearch
-args:
-  reason: "Decide whether to adopt Next.js MCP"
-  query: "Next.js MCP guide; next-devtools-mcp repo"
-  quality: balanced
-```
+- A web research tool that delegates to Codex CLI search and returns a summary, caveats, and sources.
+- Works even when OpenCode web search is feature-flagged off.
+- Lets you ask for research in plain language; no URLs required.
+
+**Quickstart**
+
+1. Install the tool (requires `codex` on your PATH).
+2. Ask your agent:
+
+- "If you do not know X, research it and cite sources."
+- "Research the latest Next.js cache components docs and summarize."
+
+3. If you need more depth, say "do a deep research pass" or "use deep web research."
