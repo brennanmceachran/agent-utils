@@ -1,41 +1,29 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import parse from "html-react-parser";
 
 import { CopyButton } from "@/components/copy-button";
 
 type InstallCommandProps = {
-  itemName: string;
-  basePath: string;
+  command: string;
   postInstall?: string;
-  installPath?: string;
+  variant?: "card" | "plain";
+  highlightedHtml?: string;
 };
 
 export function InstallCommand({
-  itemName,
-  basePath,
+  command,
   postInstall,
-  installPath,
+  variant = "card",
+  highlightedHtml,
 }: InstallCommandProps) {
-  const [origin, setOrigin] = useState<string>("");
-
-  useEffect(() => {
-    setOrigin(window.location.origin);
-  }, []);
-
-  const command = useMemo(() => {
-    const normalizedBase = basePath ? basePath.replace(/\/$/, "") : "";
-    const fileName = installPath || `${itemName}.json`;
-    const url = `${origin || "https://your-site-url"}${normalizedBase}/${fileName}`;
-    const base = `npx shadcn@latest add ${url}`;
-    if (!postInstall) {
-      return base;
-    }
-    return `${base} && ${postInstall}`;
-  }, [origin, basePath, itemName, installPath, postInstall]);
+  const containerClassName =
+    variant === "card"
+      ? "rounded-2xl border border-border/70 bg-card/80 p-5 shadow-sm backdrop-blur"
+      : "space-y-4";
 
   return (
-    <div className="rounded-2xl border border-border/70 bg-card/80 p-5 shadow-sm backdrop-blur">
+    <div className={containerClassName}>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
@@ -48,9 +36,9 @@ export function InstallCommand({
         </div>
         <CopyButton value={command} label="Copy" />
       </div>
-      <pre className="mt-4 overflow-x-auto rounded-xl border border-foreground/10 bg-foreground px-4 py-3 text-xs text-background shadow-inner">
-        <code className="font-mono">{command}</code>
-      </pre>
+      <div className="mt-4 overflow-x-auto rounded-xl border border-border/60 bg-muted/40 p-4 text-xs text-foreground">
+        {highlightedHtml ? parse(highlightedHtml) : <code className="font-mono">{command}</code>}
+      </div>
     </div>
   );
 }

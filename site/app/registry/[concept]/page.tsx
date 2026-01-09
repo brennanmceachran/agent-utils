@@ -1,12 +1,16 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { Markdown } from "@/components/markdown";
 import { PlatformTabs } from "@/components/platform-tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { buildHighlightedFiles } from "@/lib/highlight";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { getConceptContent } from "@/lib/concept-content";
+import { buildHighlightedFiles, highlightSnippet } from "@/lib/highlight";
+import { buildInstallCommand, getBasePath, getDefaultOrigin } from "@/lib/install";
 import { getConceptBySlug, getConcepts, getItemsByConcept } from "@/lib/registry";
+import { cn } from "@/lib/utils";
 
 export const dynamicParams = false;
 
@@ -26,132 +30,261 @@ export default async function ConceptPage({
     notFound();
   }
 
+  const concepts = getConcepts().sort((a, b) => a.name.localeCompare(b.name));
   const variants = getItemsByConcept(concept.slug);
   const opencodeVariant = variants.find((item) => item.meta?.platform === "opencode");
-  const basePath = process.env.BASE_PATH ? `/${process.env.BASE_PATH}` : "";
+  const basePath = getBasePath();
   const codeBlocks = opencodeVariant ? await buildHighlightedFiles(opencodeVariant.files) : [];
+  const content = await getConceptContent(concept.slug);
+  const origin = getDefaultOrigin(basePath);
+  const installCommand = opencodeVariant
+    ? buildInstallCommand({
+        origin,
+        basePath,
+        itemName: opencodeVariant.name,
+        installPath: opencodeVariant.meta?.installPath,
+        postInstall: opencodeVariant.meta?.postInstall,
+      })
+    : "";
+  const installCommandHtml = installCommand ? await highlightSnippet(installCommand, "bash") : "";
+
+  const toc = [
+    { id: "install", label: "Installation", visible: true },
+    { id: "usage", label: "Usage", visible: Boolean(content.usage.trim()) },
+    { id: "examples", label: "Examples", visible: Boolean(content.examples.trim()) },
+    { id: "notes", label: "Notes", visible: Boolean(content.notes.trim()) },
+  ].filter((item) => item.visible);
 
   return (
     <main className="min-h-screen bg-background">
-      <div className="relative overflow-hidden">
-        <div className="pointer-events-none absolute inset-0">
+      <div className="relative">
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <div className="absolute -left-24 top-16 h-64 w-64 rounded-full bg-orange-200/30 blur-3xl" />
           <div className="absolute right-[-120px] top-40 h-72 w-72 rounded-full bg-cyan-200/30 blur-3xl" />
           <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(15,23,42,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(15,23,42,0.06)_1px,transparent_1px)] bg-[size:72px_72px] opacity-40" />
         </div>
-        <div className="relative mx-auto flex w-full max-w-6xl flex-col gap-12 px-6 py-16">
-          <header className="flex flex-wrap items-center justify-between gap-4">
+
+        <header className="sticky top-0 z-30 border-b border-border/60 bg-background/80 backdrop-blur">
+          <div className="flex w-full items-center gap-6 px-4 py-3 sm:px-6 xl:px-10">
             <Link href="/" className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-900 text-white shadow-sm">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-white shadow-sm">
                 AU
               </div>
-              <div className="flex flex-col">
+              <div className="hidden sm:flex flex-col">
                 <span className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-600">
                   Agent Utils
                 </span>
-                <span className="text-sm text-muted-foreground">OpenCode-first registry</span>
               </div>
             </Link>
-            <div className="flex items-center gap-2">
-              <Button asChild variant="ghost">
-                <Link href="/registry">Registry</Link>
+
+            <nav className="hidden lg:flex items-center gap-4 text-sm font-medium text-muted-foreground">
+              <Link href="/" className="hover:text-foreground">
+                Home
+              </Link>
+              <Link href="/registry" className="hover:text-foreground">
+                Registry
+              </Link>
+            </nav>
+
+            <div className="hidden md:block flex-1">
+              <div className="max-w-md">
+                <input
+                  aria-label="Search registry"
+                  className="w-full rounded-xl border border-border/70 bg-white/80 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground shadow-sm"
+                  placeholder="Search registry..."
+                  type="search"
+                />
+              </div>
+            </div>
+
+            <div className="ml-auto flex items-center gap-2">
+              <Button asChild variant="outline" className="hidden sm:inline-flex">
+                <a
+                  href="https://github.com/brennanmceachran/agent-utils"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  GitHub
+                </a>
               </Button>
               <Button asChild variant="secondary">
                 <Link href="/registry">Browse registry</Link>
               </Button>
             </div>
-          </header>
+          </div>
+        </header>
 
-          <section className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
-            <div className="min-w-0 space-y-6">
-              <div className="space-y-4">
-                <Badge variant="secondary">Concept</Badge>
-                <div className="space-y-3">
-                  <h1 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
-                    {concept.name}
-                  </h1>
-                  <p className="text-lg text-muted-foreground">{concept.summary}</p>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {concept.tags.map((tag) => (
-                    <Badge key={tag} variant="outline">
-                      {tag}
-                    </Badge>
-                  ))}
-                </div>
-                <div className="flex flex-wrap gap-3">
-                  <Badge variant="secondary">
-                    {variants.length} {variants.length === 1 ? "variant" : "variants"}
-                  </Badge>
-                  {opencodeVariant ? <Badge variant="outline">OpenCode ready</Badge> : null}
-                </div>
-              </div>
-
+        <div className="relative w-full px-4 pb-16 pt-6 sm:px-6 xl:px-10">
+          <div className="mt-6 grid gap-8 lg:grid-cols-[minmax(200px,240px)_minmax(0,720px)_minmax(0,1fr)] xl:grid-cols-[minmax(240px,1fr)_minmax(0,760px)_minmax(240px,1fr)]">
+            <aside className="hidden lg:flex lg:flex-col lg:sticky lg:top-20 lg:h-[calc(100vh-6rem)] lg:justify-self-start lg:overflow-y-auto lg:pr-2">
               <div className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Why teams adopt it</CardTitle>
-                    <CardDescription>
-                      The outcomes this concept is designed to unlock.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="space-y-3 text-sm text-muted-foreground">
-                      {concept.why.map((item) => (
-                        <li key={item} className="flex items-start gap-2">
-                          <span className="mt-2 h-1.5 w-1.5 rounded-full bg-slate-400" />
-                          <span>{item}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                </Card>
+                <div className="space-y-2">
+                  <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
+                    Registry
+                  </p>
+                  <nav className="space-y-1">
+                    {concepts.map((item) => {
+                      const active = item.slug === concept.slug;
+                      return (
+                        <Link
+                          key={item.slug}
+                          href={`/registry/${item.slug}`}
+                          aria-current={active ? "page" : undefined}
+                          className={cn(
+                            "flex items-center justify-between rounded-xl px-3 py-2 text-sm font-medium transition",
+                            active
+                              ? "bg-foreground text-background shadow-sm"
+                              : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
+                          )}
+                        >
+                          <span>{item.name}</span>
+                        </Link>
+                      );
+                    })}
+                  </nav>
+                </div>
+              </div>
+            </aside>
 
-                <Card>
-                  <CardHeader>
-                    <CardTitle>What ships with it</CardTitle>
-                    <CardDescription>
-                      Core capabilities included in the OpenCode variant.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="space-y-3 text-sm text-muted-foreground">
-                      {concept.what.map((item) => (
-                        <li key={item} className="flex items-start gap-2">
-                          <span className="mt-2 h-1.5 w-1.5 rounded-full bg-slate-400" />
-                          <span>{item}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                </Card>
+            <div className="min-w-0 max-w-full lg:justify-self-center">
+              <div className="space-y-14">
+                <section className="space-y-6">
+                  <div className="flex flex-wrap items-center gap-3">
+                    {opencodeVariant ? <Badge variant="outline">OpenCode ready</Badge> : null}
+                    <Badge variant="outline">
+                      {variants.length} {variants.length === 1 ? "variant" : "variants"}
+                    </Badge>
+                  </div>
+                  <div className="space-y-3">
+                    <h1 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
+                      {concept.name}
+                    </h1>
+                    <p className="text-lg text-muted-foreground">{concept.summary}</p>
+                  </div>
 
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Common use cases</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="space-y-3 text-sm text-muted-foreground">
-                      {concept.useCases.map((item) => (
-                        <li key={item} className="flex items-start gap-2">
-                          <span className="mt-2 h-1.5 w-1.5 rounded-full bg-slate-400" />
-                          <span>{item}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                </Card>
+                  {content.quickstart.trim() ? (
+                    <Card className="bg-white/80">
+                      <CardHeader>
+                        <CardTitle>Quick start</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <Markdown html={content.quickstart} />
+                      </CardContent>
+                    </Card>
+                  ) : null}
+                </section>
+
+                <section id="install" className="scroll-mt-24 space-y-6">
+                  <div className="flex flex-wrap items-center justify-between gap-4">
+                    <div className="space-y-2">
+                      <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
+                        Installation
+                      </p>
+                      <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+                        Install
+                      </h2>
+                    </div>
+                    <div className="min-w-[220px]">
+                      <select
+                        aria-label="Platform"
+                        defaultValue="opencode"
+                        className="w-full rounded-xl border border-border/70 bg-white/80 px-3 py-2 text-sm font-medium text-foreground shadow-sm"
+                      >
+                        <option value="opencode">OpenCode</option>
+                        <option value="claude" disabled>
+                          Claude Code (soon)
+                        </option>
+                        <option value="codex" disabled>
+                          Codex CLI (soon)
+                        </option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="rounded-2xl bg-white/80 p-6 shadow-sm">
+                    <PlatformTabs
+                      opencodeVariant={opencodeVariant}
+                      installCommand={installCommand}
+                      installCommandHtml={installCommandHtml}
+                      codeBlocks={codeBlocks}
+                    />
+                  </div>
+                </section>
+
+                {content.usage.trim() ? (
+                  <section id="usage" className="scroll-mt-24 space-y-6">
+                    <div className="space-y-2">
+                      <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
+                        Usage
+                      </p>
+                      <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+                        How to use it well
+                      </h2>
+                    </div>
+                    <Card>
+                      <CardContent className="pt-6">
+                        <Markdown html={content.usage} />
+                      </CardContent>
+                    </Card>
+                  </section>
+                ) : null}
+
+                {content.examples.trim() ? (
+                  <section id="examples" className="scroll-mt-24 space-y-6">
+                    <div className="space-y-2">
+                      <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
+                        Examples
+                      </p>
+                      <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+                        Shared runs
+                      </h2>
+                    </div>
+                    <Card>
+                      <CardContent className="pt-6">
+                        <Markdown html={content.examples} />
+                      </CardContent>
+                    </Card>
+                  </section>
+                ) : null}
+
+                {content.notes.trim() ? (
+                  <section id="notes" className="scroll-mt-24 space-y-6">
+                    <div className="space-y-2">
+                      <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
+                        Notes
+                      </p>
+                      <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+                        Notes
+                      </h2>
+                    </div>
+                    <Card>
+                      <CardContent className="pt-6">
+                        <Markdown html={content.notes} />
+                      </CardContent>
+                    </Card>
+                  </section>
+                ) : null}
               </div>
             </div>
 
-            <div className="min-w-0 space-y-6 lg:sticky lg:top-10">
-              <PlatformTabs
-                opencodeVariant={opencodeVariant}
-                basePath={basePath}
-                codeBlocks={codeBlocks}
-              />
-            </div>
-          </section>
+            <aside className="hidden xl:flex xl:flex-col xl:sticky xl:top-20 xl:h-[calc(100vh-6rem)] xl:justify-self-end xl:overflow-y-auto xl:pl-2">
+              <div className="space-y-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
+                  On this page
+                </p>
+                <nav className="space-y-2 text-sm text-muted-foreground">
+                  {toc.map((item) => (
+                    <a
+                      key={item.id}
+                      href={`#${item.id}`}
+                      className="block rounded-md px-2 py-1 transition hover:bg-muted/60 hover:text-foreground"
+                    >
+                      {item.label}
+                    </a>
+                  ))}
+                </nav>
+              </div>
+            </aside>
+          </div>
         </div>
       </div>
     </main>

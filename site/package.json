@@ -21,8 +21,13 @@
     "next": "16.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "html-react-parser": "^5.1.18",
+    "remark": "^15.0.1",
+    "remark-gfm": "^4.0.0",
+    "remark-html": "^16.0.0",
     "shiki": "^1.22.0",
-    "tailwind-merge": "^2.4.0"
+    "tailwind-merge": "^2.4.0",
+    "unist-util-visit": "^5.0.0"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

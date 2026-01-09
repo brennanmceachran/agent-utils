@@ -4,15 +4,28 @@ import { InstallCommand } from "@/components/install-command";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { highlightSnippet } from "@/lib/highlight";
+import { buildInstallCommand, getBasePath, getDefaultOrigin } from "@/lib/install";
 import { getConcepts, getRegistryItems } from "@/lib/registry";
 
-export default function HomePage() {
+export default async function HomePage() {
   const concepts = getConcepts();
   const registryItems = getRegistryItems();
   const featured = concepts.slice(0, 3);
   const totalFiles = registryItems.reduce((count, item) => count + item.files.length, 0);
   const featuredItem = registryItems[0];
-  const basePath = process.env.BASE_PATH ? `/${process.env.BASE_PATH}` : "";
+  const basePath = getBasePath();
+  const origin = getDefaultOrigin(basePath);
+  const installCommand = featuredItem
+    ? buildInstallCommand({
+        origin,
+        basePath,
+        itemName: featuredItem.name,
+        installPath: featuredItem.meta?.installPath,
+        postInstall: featuredItem.meta?.postInstall,
+      })
+    : "";
+  const installCommandHtml = installCommand ? await highlightSnippet(installCommand, "bash") : "";
 
   return (
     <main className="min-h-screen bg-background">
@@ -33,7 +46,6 @@ export default function HomePage() {
                 <span className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-600">
                   Agent Utils
                 </span>
-                <span className="text-sm text-muted-foreground">OpenCode-first registry</span>
               </div>
             </Link>
             <div className="flex items-center gap-2">
@@ -89,10 +101,9 @@ export default function HomePage() {
             <div className="space-y-6">
               {featuredItem ? (
                 <InstallCommand
-                  itemName={featuredItem.name}
-                  basePath={basePath}
+                  command={installCommand}
+                  highlightedHtml={installCommandHtml}
                   postInstall={featuredItem.meta?.postInstall}
-                  installPath={featuredItem.meta?.installPath}
                 />
               ) : null}
               <Card className="bg-white/80">

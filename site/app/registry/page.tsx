@@ -28,7 +28,6 @@ export default function RegistryPage() {
                 <span className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-600">
                   Agent Utils
                 </span>
-                <span className="text-sm text-muted-foreground">OpenCode-first registry</span>
               </div>
             </Link>
             <div className="flex items-center gap-2">

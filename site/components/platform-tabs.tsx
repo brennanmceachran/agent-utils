@@ -1,10 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
 import { CopyButton } from "@/components/copy-button";
 import { InstallCommand } from "@/components/install-command";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type RegistryFile = {
@@ -37,128 +34,120 @@ type CodeBlock = {
 
 type PlatformTabsProps = {
   opencodeVariant?: RegistryItem | null;
-  basePath: string;
+  installCommand: string;
+  installCommandHtml?: string;
   codeBlocks?: CodeBlock[];
 };
 
-const PLATFORM_KEY = "agent-utils-platform";
-const AVAILABLE_PLATFORMS = ["opencode"] as const;
-
-type Platform = (typeof AVAILABLE_PLATFORMS)[number];
-
-export function PlatformTabs({ opencodeVariant, basePath, codeBlocks = [] }: PlatformTabsProps) {
-  const [platform, setPlatform] = useState<Platform>("opencode");
-
-  useEffect(() => {
-    const stored = window.localStorage.getItem(PLATFORM_KEY);
-    if (stored && AVAILABLE_PLATFORMS.includes(stored as Platform)) {
-      setPlatform(stored as Platform);
-    }
-  }, []);
-
-  const handleChange = (value: string) => {
-    if (AVAILABLE_PLATFORMS.includes(value as Platform)) {
-      setPlatform(value as Platform);
-      window.localStorage.setItem(PLATFORM_KEY, value);
-    }
-  };
+export function PlatformTabs({
+  opencodeVariant,
+  installCommand,
+  installCommandHtml,
+  codeBlocks = [],
+}: PlatformTabsProps) {
+  if (!opencodeVariant) {
+    return (
+      <div className="rounded-xl border border-border/70 bg-muted/30 p-4 text-sm text-muted-foreground">
+        <p className="text-sm font-semibold text-foreground">OpenCode variant unavailable</p>
+        <p>This concept does not yet ship an OpenCode package.</p>
+      </div>
+    );
+  }
 
   return (
-    <Tabs value={platform} onValueChange={handleChange}>
-      <TabsList className="w-full justify-start">
-        <TabsTrigger value="opencode">OpenCode</TabsTrigger>
-        <TabsTrigger value="claude" disabled>
-          Claude Code (soon)
+    <Tabs defaultValue="cli" className="min-w-0 max-w-full space-y-6">
+      <TabsList className="w-full max-w-full justify-start gap-4 border-0 bg-transparent p-0 shadow-none">
+        <TabsTrigger
+          value="cli"
+          className="rounded-none border-b-2 border-transparent px-0 pb-2 text-xs font-semibold text-muted-foreground data-[state=active]:border-foreground data-[state=active]:text-foreground data-[state=active]:bg-transparent"
+        >
+          CLI
         </TabsTrigger>
-        <TabsTrigger value="codex" disabled>
-          Codex CLI (soon)
+        <TabsTrigger
+          value="manual"
+          className="rounded-none border-b-2 border-transparent px-0 pb-2 text-xs font-semibold text-muted-foreground data-[state=active]:border-foreground data-[state=active]:text-foreground data-[state=active]:bg-transparent"
+        >
+          Manual
         </TabsTrigger>
       </TabsList>
 
-      <TabsContent value="opencode" className="space-y-6">
-        {opencodeVariant ? (
-          <>
-            <InstallCommand
-              itemName={opencodeVariant.name}
-              basePath={basePath}
-              postInstall={opencodeVariant.meta?.postInstall}
-              installPath={opencodeVariant.meta?.installPath}
-            />
-            <Card>
-              <CardHeader>
-                <CardTitle>Manual install</CardTitle>
-                <CardDescription>Copy these files into your repo.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2 text-sm text-muted-foreground">
-                  {opencodeVariant.files.map((file) => (
-                    <li key={file.path} className="flex flex-wrap items-center gap-2">
-                      <span className="font-mono text-foreground">{file.target}</span>
-                      <span className="text-muted-foreground">
-                        {file.target ? " <- " : ""}
-                        {file.path}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-            {codeBlocks.length ? (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Code files</CardTitle>
-                  <CardDescription>Preview each file with syntax highlighting.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <Tabs defaultValue={codeBlocks[0].id}>
-                    <TabsList className="flex h-auto flex-wrap gap-2 bg-transparent p-0">
-                      {codeBlocks.map((block) => (
-                        <TabsTrigger
-                          key={block.id}
-                          value={block.id}
-                          className="border border-border/70 bg-white/80 text-muted-foreground font-mono tracking-normal data-[state=active]:bg-foreground data-[state=active]:text-background"
-                        >
-                          {block.label}
-                        </TabsTrigger>
-                      ))}
-                    </TabsList>
+      <TabsContent value="cli" className="space-y-4">
+        <InstallCommand
+          command={installCommand}
+          highlightedHtml={installCommandHtml}
+          postInstall={opencodeVariant.meta?.postInstall}
+          variant="plain"
+        />
+      </TabsContent>
+
+      <TabsContent value="manual" className="min-w-0 max-w-full space-y-6">
+        <div className="space-y-3">
+          <div className="space-y-1">
+            <p className="text-sm font-semibold">Manual install</p>
+            <p className="text-sm text-muted-foreground">
+              Copy these files into your repo so OpenCode can load them.
+            </p>
+          </div>
+          <ol className="min-w-0 space-y-3 text-sm text-muted-foreground">
+            {opencodeVariant.files.map((file) => (
+              <li key={file.path} className="min-w-0 flex items-start gap-3">
+                <span className="mt-2 h-2 w-2 rounded-full bg-muted-foreground/60" />
+                <div className="min-w-0 space-y-1">
+                  <span className="block max-w-full break-all font-mono text-foreground">
+                    {file.target ?? file.path}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    {file.target ? "Place the file at this path." : "Target path not specified."}
+                  </span>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </div>
+
+        {codeBlocks.length ? (
+          <div className="space-y-3 pt-4">
+            <div className="space-y-1">
+              <p className="text-sm font-semibold">Code files</p>
+              <p className="text-sm text-muted-foreground">Preview and copy each file below.</p>
+            </div>
+            <Tabs defaultValue={codeBlocks[0].id} className="min-w-0 max-w-full">
+              <div className="rounded-2xl border border-border/60 bg-white/80">
+                <div className="border-b border-border/60 px-3 pt-3">
+                  <TabsList className="flex w-full flex-nowrap justify-start gap-4 border-0 bg-transparent px-0 pb-2 shadow-none overflow-x-auto">
                     {codeBlocks.map((block) => (
-                      <TabsContent key={block.id} value={block.id} className="mt-4">
-                        <div className="rounded-2xl border border-border/70 bg-white/80 p-4 shadow-sm">
-                          <div className="flex items-center justify-between text-xs text-muted-foreground">
-                            <span className="font-mono">{block.target ?? block.path}</span>
-                            <CopyButton value={block.raw} label="Copy file" />
-                          </div>
-                          <div className="mt-3 overflow-x-auto rounded-xl border border-border/60 bg-muted/40 p-4">
-                            <div
-                              className="text-[13px]"
-                              dangerouslySetInnerHTML={{ __html: block.html }}
-                            />
-                          </div>
-                        </div>
-                      </TabsContent>
+                      <TabsTrigger
+                        key={block.id}
+                        value={block.id}
+                        className="whitespace-nowrap rounded-none border-b-2 border-transparent px-0 pb-2 text-xs font-semibold font-mono tracking-normal text-muted-foreground data-[state=active]:border-foreground data-[state=active]:text-foreground data-[state=active]:bg-transparent"
+                      >
+                        {block.label}
+                      </TabsTrigger>
                     ))}
-                  </Tabs>
-                </CardContent>
-              </Card>
-            ) : null}
-            {opencodeVariant.docs ? (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Notes</CardTitle>
-                  <CardDescription>{opencodeVariant.docs}</CardDescription>
-                </CardHeader>
-              </Card>
-            ) : null}
-          </>
-        ) : (
-          <Card>
-            <CardHeader>
-              <CardTitle>OpenCode variant unavailable</CardTitle>
-              <CardDescription>This concept does not yet ship an OpenCode package.</CardDescription>
-            </CardHeader>
-          </Card>
-        )}
+                  </TabsList>
+                </div>
+                {codeBlocks.map((block) => (
+                  <TabsContent key={block.id} value={block.id} className="min-w-0 px-3 pb-3 pt-2">
+                    <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
+                      <span className="min-w-0 flex-1 truncate font-mono">
+                        {block.target ?? block.path}
+                      </span>
+                      <CopyButton value={block.raw} label="Copy file" />
+                    </div>
+                    <div className="mt-3 border-t border-border/60 pt-3">
+                      <div className="overflow-x-auto">
+                        <div
+                          className="text-[13px]"
+                          dangerouslySetInnerHTML={{ __html: block.html }}
+                        />
+                      </div>
+                    </div>
+                  </TabsContent>
+                ))}
+              </div>
+            </Tabs>
+          </div>
+        ) : null}
       </TabsContent>
     </Tabs>
   );

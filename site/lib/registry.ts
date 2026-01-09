@@ -36,9 +36,6 @@ export type Concept = {
   slug: string;
   name: string;
   summary: string;
-  why: string[];
-  what: string[];
-  useCases: string[];
   tags: string[];
 };
 

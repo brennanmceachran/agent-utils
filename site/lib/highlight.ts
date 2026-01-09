@@ -56,6 +56,22 @@ function makeTabId(filePath: string) {
   return filePath.replace(/[^a-zA-Z0-9-_]/g, "-");
 }
 
+function makeTabLabel(file: RegistryFile) {
+  if (!file.target) {
+    return path.basename(file.path);
+  }
+  const cleaned = file.target.replace(/^~\//, "");
+  const parts = cleaned.split("/").filter(Boolean);
+  if (parts.length >= 2) {
+    return `${parts[parts.length - 2]}/${parts[parts.length - 1]}`;
+  }
+  return parts[parts.length - 1] || path.basename(file.path);
+}
+
+export async function highlightSnippet(code: string, language = "bash") {
+  return codeToHtml(code, { lang: language, theme: THEME });
+}
+
 export async function buildHighlightedFiles(files: RegistryFile[]): Promise<HighlightedFile[]> {
   return Promise.all(
     files.map(async (file) => {
@@ -67,7 +83,7 @@ export async function buildHighlightedFiles(files: RegistryFile[]): Promise<High
       });
       return {
         id: makeTabId(file.path),
-        label: path.basename(file.path),
+        label: makeTabLabel(file),
         path: file.path,
         target: file.target,
         raw,

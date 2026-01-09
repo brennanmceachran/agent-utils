@@ -1,20 +1,6 @@
 {
   "slug": "ralph-loop",
   "name": "Ralph Loop",
-  "summary": "Autonomous iteration loop for OpenCode that drives work from a prompt file.",
-  "why": [
-    "Maintain momentum on multi-step tasks without repeated manual prompts.",
-    "Keep a durable progress log for handoffs and long-running work.",
-    "Constrain execution to one useful step per iteration to reduce drift."
-  ],
-  "what": [
-    "An OpenCode agent, command, and plugin that execute work in discrete iterations.",
-    "Updates the prompt file with status, verification, and next steps after each turn."
-  ],
-  "useCases": [
-    "Break down large migrations into repeatable, verifiable steps.",
-    "Run ongoing refactors with clear acceptance criteria and verification checkpoints.",
-    "Coordinate long-lived tasks that need consistent progress tracking."
-  ],
+  "summary": "Iterative loop for OpenCode that advances one step per run from a prompt file.",
   "tags": ["agent", "command", "plugin", "workflow", "iteration"]
 }
