@@ -1,5 +1,7 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getTweet } from "react-tweet/api";
 
 import { PlatformTabs } from "@/components/platform-tabs";
 import { Badge } from "@/components/ui/badge";
@@ -8,14 +10,142 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getConceptContent } from "@/lib/concept-content";
 import { buildHighlightedFiles, highlightSnippet } from "@/lib/highlight";
 import { buildInstallCommand, getBasePath, getDefaultOrigin } from "@/lib/install";
-import { getConceptBySlug, getConcepts, getItemsByConcept } from "@/lib/registry";
+import { getConceptBySlug, getConcepts, getItemsByConcept, readRegistryFile } from "@/lib/registry";
 import { cn } from "@/lib/utils";
 
-export const metadata = {
-  referrer: "no-referrer",
+const MEDIA_TYPE = "video/mp4";
+
+type TweetResponse = Awaited<ReturnType<typeof getTweet>>;
+
+type TweetMedia = {
+  image?: string;
+  video?: string;
 };
 
+function extractTweetSource(overview: string) {
+  const urlMatch = overview.match(/<TweetEmbed[^>]*url=["']([^"']+)["']/);
+  const idMatch = overview.match(/<TweetEmbed[^>]*id=["']([^"']+)["']/);
+  const url = urlMatch?.[1];
+  const id = idMatch?.[1] ?? (url ? url.match(/status\/(\d+)/)?.[1] : undefined);
+
+  return { id, url };
+}
+
+function pickBestVideo(tweet: TweetResponse) {
+  const media = tweet?.mediaDetails?.find(
+    (item) => item.type === "video" || item.type === "animated_gif",
+  );
+  const mediaVariants = media?.video_info?.variants ?? [];
+  const tweetVariants = tweet?.video?.variants ?? [];
+
+  const mp4Variants = [
+    ...mediaVariants
+      .filter((variant) => variant.content_type === MEDIA_TYPE)
+      .map((variant) => ({ url: variant.url, bitrate: variant.bitrate ?? 0 })),
+    ...tweetVariants
+      .filter((variant) => variant.type === MEDIA_TYPE)
+      .map((variant) => ({ url: variant.src, bitrate: 0 })),
+  ];
+
+  if (!mp4Variants.length) {
+    return undefined;
+  }
+
+  const best = [...mp4Variants].sort((a, b) => b.bitrate - a.bitrate)[0];
+  return best?.url;
+}
+
+function pickPoster(tweet: TweetResponse) {
+  const poster = tweet?.video?.poster;
+  if (poster) {
+    return poster;
+  }
+
+  const media = tweet?.mediaDetails?.find((item) => item.type === "video");
+  if (media?.media_url_https) {
+    return media.media_url_https;
+  }
+
+  const photo = tweet?.photos?.[0]?.url;
+  if (photo) {
+    return photo;
+  }
+
+  const mediaPhoto = tweet?.mediaDetails?.find((item) => item.type === "photo");
+  return mediaPhoto?.media_url_https;
+}
+
+async function getTweetMedia(conceptSlug: string): Promise<TweetMedia | null> {
+  try {
+    const overview = readRegistryFile(`registry/${conceptSlug}/content/overview.mdx`);
+    const { id } = extractTweetSource(overview);
+
+    if (!id) {
+      return null;
+    }
+
+    const tweet = await getTweet(id);
+    if (!tweet) {
+      return null;
+    }
+
+    return {
+      image: pickPoster(tweet),
+      video: pickBestVideo(tweet),
+    };
+  } catch (error) {
+    return null;
+  }
+}
+
 export const dynamicParams = false;
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ concept: string }>;
+}): Promise<Metadata> {
+  const { concept: conceptSlug } = await params;
+  const concept = getConceptBySlug(conceptSlug);
+
+  if (!concept) {
+    return {};
+  }
+
+  const basePath = getBasePath();
+  const origin = getDefaultOrigin(basePath);
+  const canonicalUrl = new URL(`${basePath}/registry/${concept.slug}/`, origin);
+  const fallbackImage = new URL(
+    `${basePath}/registry/${concept.slug}/opengraph-image.png`,
+    origin,
+  ).toString();
+  const tweetMedia = await getTweetMedia(concept.slug);
+  const imageUrls = [tweetMedia?.image, fallbackImage].filter(Boolean) as string[];
+
+  return {
+    referrer: "no-referrer",
+    metadataBase: new URL(origin),
+    title: `${concept.name} | Agent Utils Registry`,
+    description: concept.summary,
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    openGraph: {
+      title: `${concept.name} | Agent Utils`,
+      description: concept.summary,
+      type: "article",
+      url: canonicalUrl,
+      images: imageUrls.map((url) => ({ url })),
+      videos: tweetMedia?.video ? [{ url: tweetMedia.video, type: MEDIA_TYPE }] : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${concept.name} | Agent Utils`,
+      description: concept.summary,
+      images: imageUrls,
+    },
+  };
+}
 
 export function generateStaticParams() {
   return getConcepts().map((concept) => ({ concept: concept.slug }));

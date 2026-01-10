@@ -13,7 +13,10 @@ const jetBrainsMono = JetBrains_Mono({
   variable: "--font-mono",
 });
 
+const metadataBaseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://brennanmceachran.github.io";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(metadataBaseUrl),
   title: "Agent Utils Registry",
   description: "Index-ready registry of OpenCode agent utilities with install-ready files.",
 };
