@@ -99,20 +99,17 @@ export default tool({
       .describe(
         "Describe the core reason you’re reaching for web search and the decision or output you’re aiming for.",
       ),
-
     query: tool.schema
       .string()
       .describe(
         'List the search queries you want run; use new lines or ";" to include multiple angles in one run. Only split into parallel calls for distinct deep dives.',
       ),
-
     additional_context: tool.schema
       .string()
       .optional()
       .describe(
         "Add constraints or background: versions, product names, prior findings, relevant files/code, or must-include sources.",
       ),
-
     quality: tool.schema
       .enum(["fast", "balanced", "deep"])
       .describe(
