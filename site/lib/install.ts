@@ -1,3 +1,5 @@
+import path from "node:path";
+
 type BuildInstallCommandArgs = {
   origin: string;
   basePath: string;
@@ -7,10 +9,22 @@ type BuildInstallCommandArgs = {
 };
 
 export function getBasePath() {
-  const fallback = process.env.NODE_ENV === "production" ? "agent-utils" : "";
-  const raw = process.env.BASE_PATH || fallback;
-  const trimmed = raw.replace(/^\/+|\/+$/g, "");
-  return trimmed ? `/${trimmed}` : "";
+  const isDev = process.env.NODE_ENV === "development";
+  const rawBasePath = process.env.BASE_PATH;
+
+  if (rawBasePath) {
+    const trimmed = rawBasePath.replace(/^\/+|\/+$/g, "");
+    return trimmed ? `/${trimmed}` : "";
+  }
+
+  if (isDev) {
+    return "";
+  }
+
+  const cwdName = path.basename(process.cwd());
+  const repoName = cwdName === "site" ? path.basename(path.resolve(process.cwd(), "..")) : cwdName;
+  const fallback = repoName || "agent-utils";
+  return `/${fallback}`;
 }
 
 export function getDefaultOrigin(basePath: string) {
@@ -27,7 +41,11 @@ export function getDefaultOrigin(basePath: string) {
   if (repo?.includes("/")) {
     const [owner, name] = repo.split("/");
     if (owner && name) {
-      return basePath ? `https://${owner}.github.io` : `https://${owner}.github.io/${name}`;
+      const isUserPage = name === `${owner}.github.io`;
+      if (isUserPage) {
+        return basePath ? `https://${owner}.github.io${basePath}` : `https://${owner}.github.io`;
+      }
+      return `https://${owner}.github.io/${name}`;
     }
   }
 

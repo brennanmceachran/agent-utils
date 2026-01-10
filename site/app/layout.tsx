@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { JetBrains_Mono, Space_Grotesk } from "next/font/google";
 
+import { getBasePath } from "@/lib/install";
+
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -13,7 +15,13 @@ const jetBrainsMono = JetBrains_Mono({
   variable: "--font-mono",
 });
 
-const metadataBaseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://brennanmceachran.github.io";
+const basePath = getBasePath();
+const defaultMetadataBase =
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://brennanmceachran.github.io";
+const metadataBaseUrl =
+  basePath && !defaultMetadataBase.endsWith(basePath)
+    ? `${defaultMetadataBase}${basePath}`
+    : defaultMetadataBase;
 
 export const metadata: Metadata = {
   metadataBase: new URL(metadataBaseUrl),

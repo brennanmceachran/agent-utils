@@ -114,13 +114,19 @@ export async function generateMetadata({
 
   const basePath = getBasePath();
   const origin = getDefaultOrigin(basePath);
-  const canonicalUrl = new URL(`${basePath}/registry/${concept.slug}/`, origin);
+  const originUrl = new URL(origin);
+  const originPath = originUrl.pathname === "/" ? "" : originUrl.pathname.replace(/\/$/, "");
+  const repoName = process.env.GITHUB_REPOSITORY?.split("/")[1];
+  const githubBasePath = repoName && !repoName.endsWith(".github.io") ? `/${repoName}` : "";
+  const resolvedBasePath =
+    basePath || originPath || (originUrl.hostname.endsWith(".github.io") ? githubBasePath : "");
+  const canonicalUrl = new URL(`${resolvedBasePath}/registry/${concept.slug}/`, originUrl.origin);
   const fallbackImage = new URL(
-    `${basePath}/registry/${concept.slug}/opengraph-image.png`,
-    origin,
+    `${resolvedBasePath}/registry/${concept.slug}/opengraph-image`,
+    originUrl.origin,
   ).toString();
   const tweetMedia = await getTweetMedia(concept.slug);
-  const imageUrls = [tweetMedia?.image, fallbackImage].filter(Boolean) as string[];
+  const imageUrls = [fallbackImage, tweetMedia?.image].filter(Boolean) as string[];
 
   return {
     referrer: "no-referrer",
@@ -128,7 +134,7 @@ export async function generateMetadata({
     title: `${concept.name} | Agent Utils Registry`,
     description: concept.summary,
     alternates: {
-      canonical: canonicalUrl,
+      canonical: canonicalUrl.toString(),
     },
     openGraph: {
       title: `${concept.name} | Agent Utils`,
