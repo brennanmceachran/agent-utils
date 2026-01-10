@@ -32,10 +32,15 @@ function normalizeCode(children: ReactNode) {
   return "";
 }
 
+type CodeElementProps = {
+  children?: ReactNode;
+  className?: string;
+};
+
 export async function MdxCodeBlock({ children, className }: MdxCodeBlockProps) {
   const codeElement = Array.isArray(children) ? children[0] : children;
 
-  if (!isValidElement(codeElement)) {
+  if (!isValidElement<CodeElementProps>(codeElement)) {
     return (
       <div
         className={cn(
@@ -48,8 +53,9 @@ export async function MdxCodeBlock({ children, className }: MdxCodeBlockProps) {
     );
   }
 
-  const rawCode = normalizeCode(codeElement.props?.children);
-  const language = extractLanguage(codeElement.props?.className);
+  const { children: codeChildren, className: codeClassName } = codeElement.props;
+  const rawCode = normalizeCode(codeChildren);
+  const language = extractLanguage(codeClassName);
 
   if (!rawCode.trim()) {
     return null;

@@ -1,11 +1,11 @@
 import fs from "node:fs";
 import path from "node:path";
-var args = process.argv.slice(2);
-var options = {
+const args = process.argv.slice(2);
+const options = {
   keep: false,
-  force: false
+  force: false,
 };
-var payloadArgs = [];
+const payloadArgs = [];
 for (const arg of args) {
   if (arg === "--keep") {
     options.keep = true;
@@ -23,8 +23,10 @@ for (const arg of args) {
 }
 function detectEol(text) {
   return text.includes(`\r
-`) ? `\r
-` : `
+`)
+    ? `\r
+`
+    : `
 `;
 }
 function stripJsonComments(input) {
@@ -32,7 +34,7 @@ function stripJsonComments(input) {
   let inString = false;
   let stringChar = "";
   let escaped = false;
-  for (let i = 0;i < input.length; i += 1) {
+  for (let i = 0; i < input.length; i += 1) {
     const char = input[i];
     const next = input[i + 1];
     if (inString) {
@@ -53,8 +55,12 @@ function stripJsonComments(input) {
       continue;
     }
     if (char === "/" && next === "/") {
-      while (i < input.length && input[i] !== `
-`) {
+      while (
+        i < input.length &&
+        input[i] !==
+          `
+`
+      ) {
         i += 1;
       }
       out += `
@@ -78,7 +84,7 @@ function stripTrailingCommas(input) {
   let inString = false;
   let stringChar = "";
   let escaped = false;
-  for (let i = 0;i < input.length; i += 1) {
+  for (let i = 0; i < input.length; i += 1) {
     const char = input[i];
     if (inString) {
       out += char;
@@ -138,12 +144,15 @@ function resolvePayloads(cwd, explicit) {
     return [];
   }
   const entries = fs.readdirSync(payloadDir, { withFileTypes: true });
-  return entries.filter((entry) => entry.isFile() && (entry.name.endsWith(".json") || entry.name.endsWith(".jsonc"))).map((entry) => path.join(payloadDir, entry.name));
+  return entries
+    .filter(
+      (entry) => entry.isFile() && (entry.name.endsWith(".json") || entry.name.endsWith(".jsonc")),
+    )
+    .map((entry) => path.join(payloadDir, entry.name));
 }
 function getConfigPath(cwd) {
   const jsoncPath = path.join(cwd, "opencode.jsonc");
-  if (fs.existsSync(jsoncPath))
-    return jsoncPath;
+  if (fs.existsSync(jsoncPath)) return jsoncPath;
   return path.join(cwd, "opencode.json");
 }
 function ensureDir(dirPath) {
@@ -177,12 +186,15 @@ function main() {
   }
   const configPath = getConfigPath(cwd);
   const configExists = fs.existsSync(configPath);
-  const configText = configExists ? fs.readFileSync(configPath, "utf8") : `{}
+  const configText = configExists
+    ? fs.readFileSync(configPath, "utf8")
+    : `{}
 `;
   const eol = detectEol(configText);
   const configData = parseJsonc(configText, path.basename(configPath));
   const configObject = configData;
-  const existingMcp = configObject.mcp && typeof configObject.mcp === "object" ? configObject.mcp : {};
+  const existingMcp =
+    configObject.mcp && typeof configObject.mcp === "object" ? configObject.mcp : {};
   const added = [];
   const skipped = [];
   const updated = [];

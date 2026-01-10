@@ -7,6 +7,9 @@
       "site/out/**",
       "site/public/**",
       "r/**",
+      "docs/**",
+      "registry/**/.opencode/**",
+      "registry/nextjs-mcp/opencode/files/bin/merge-mcp.mjs",
       ".opencode/node_modules/**"
     ]
   },

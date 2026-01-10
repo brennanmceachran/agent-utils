@@ -193,3 +193,38 @@
     text-underline-offset: 3px;
   }
 }
+
+@layer utilities {
+  @keyframes float-slow {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-18px);
+    }
+  }
+
+  @keyframes rise-in {
+    0% {
+      opacity: 0;
+      transform: translateY(18px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-float-slow {
+    animation: float-slow 16s ease-in-out infinite;
+  }
+
+  .animate-float-slower {
+    animation: float-slow 24s ease-in-out infinite;
+  }
+
+  .animate-rise-in {
+    animation: rise-in 0.8s ease-out both;
+  }
+}

@@ -1,4 +1,9 @@
-import parse, { domToReact, type Element, type HTMLReactParserOptions } from "html-react-parser";
+import parse, {
+  domToReact,
+  type DOMNode,
+  type Element,
+  type HTMLReactParserOptions,
+} from "html-react-parser";
 
 import { TweetEmbed } from "@/components/tweet-embed";
 import { cn } from "@/lib/utils";
@@ -26,8 +31,11 @@ export function Markdown({ html, className }: MarkdownProps) {
       }
 
       const { id, url, variant, class: classAttr, className: classNameAttr } = node.attribs ?? {};
-      const normalizedVariant = variant === "media" || variant === "default" ? variant : undefined;
-      const children = node.children?.length ? domToReact(node.children, options) : null;
+      const normalizedVariant =
+        variant === "media" ? "media" : variant === "full" ? "full" : undefined;
+      const children = node.children?.length
+        ? domToReact(node.children as DOMNode[], options)
+        : null;
 
       return (
         <>

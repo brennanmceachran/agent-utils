@@ -13,6 +13,7 @@ type TweetEmbedProps = {
   id?: string;
   url?: string;
   className?: string;
+  variant?: "full" | "media";
 };
 
 type TweetResponse = Awaited<ReturnType<typeof getTweet>>;
@@ -66,7 +67,7 @@ function getVideoMedia(tweet: TweetResponse): MediaVideo | null {
     (item) => item.type === "video" || item.type === "animated_gif",
   );
 
-  if (!media || media.type === "photo") {
+  if (!media) {
     return null;
   }
 
@@ -187,7 +188,13 @@ function renderTweetText(entities: TweetEntity[]) {
   });
 }
 
-function TweetEmbedFallback({ url, className }: { url: string; className?: string }) {
+function TweetEmbedFallback({
+  url,
+  className,
+}: {
+  url: string;
+  className?: string;
+}) {
   return (
     <div
       className={cn(
@@ -209,7 +216,7 @@ function TweetEmbedFallback({ url, className }: { url: string; className?: strin
   );
 }
 
-export async function TweetEmbed({ id, url, className }: TweetEmbedProps) {
+export async function TweetEmbed({ id, url, className, variant = "full" }: TweetEmbedProps) {
   const tweetId = getTweetId({ id, url });
 
   if (!tweetId) {
@@ -240,6 +247,49 @@ export async function TweetEmbed({ id, url, className }: TweetEmbedProps) {
   const poster = tweet.video?.poster ?? videoMedia?.media_url_https;
   const hasMedia = Boolean(mp4Variant || photo);
 
+  if (variant === "media") {
+    if (!mp4Variant && !photo) {
+      return null;
+    }
+
+    return (
+      <div
+        className={cn(
+          "overflow-hidden rounded-b-2xl border border-border/70 bg-card/80 shadow-sm",
+          className,
+        )}
+      >
+        {mp4Variant ? (
+          <div className="relative w-full bg-slate-950" style={{ aspectRatio: "16 / 9" }}>
+            <video
+              className="h-full w-full object-cover"
+              controls
+              playsInline
+              preload="metadata"
+              poster={poster}
+              aria-label="Tweet video"
+              crossOrigin="anonymous"
+            >
+              <source src={mp4Variant.src} type={mp4Variant.type} />
+              <track kind="captions" srcLang="en" label="English" src="data:text/vtt,WEBVTT" />
+            </video>
+          </div>
+        ) : photo ? (
+          <div className="relative w-full bg-slate-950" style={{ aspectRatio: "16 / 9" }}>
+            <img
+              src={photo.src}
+              alt={photo.alt}
+              loading="lazy"
+              className="h-full w-full object-cover"
+              referrerPolicy="no-referrer"
+              crossOrigin="anonymous"
+            />
+          </div>
+        ) : null}
+      </div>
+    );
+  }
+
   return (
     <div
       className={cn(
@@ -256,10 +306,9 @@ export async function TweetEmbed({ id, url, className }: TweetEmbedProps) {
             preload="metadata"
             poster={poster}
             aria-label="Tweet video"
-            referrerPolicy="no-referrer"
             crossOrigin="anonymous"
           >
-            <source src={mp4Variant.src} type={mp4Variant.type} referrerPolicy="no-referrer" />
+            <source src={mp4Variant.src} type={mp4Variant.type} />
             <track kind="captions" srcLang="en" label="English" src="data:text/vtt,WEBVTT" />
           </video>
         </div>
