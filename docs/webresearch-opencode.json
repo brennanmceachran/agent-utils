@@ -16,8 +16,7 @@
     "platform": "opencode",
     "kind": [
       "tool"
-    ],
-    "installPath": "webresearch-opencode.v1.json"
+    ]
   },
   "docs": "Requires the `codex` CLI on PATH. Restart OpenCode after installing to register the tool. Targets prefixed with ~ are repo-scoped (project-root) paths.",
   "type": "registry:item"

@@ -1,4 +1,12 @@
-import { copyFileSync, existsSync, mkdirSync, readFileSync, rmSync, statSync } from "node:fs";
+import {
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  statSync,
+} from "node:fs";
 import path from "node:path";
 
 type RegistryFile = {
@@ -9,7 +17,6 @@ type RegistryFile = {
 };
 
 type RegistryMeta = {
-  installPath?: string;
   [key: string]: unknown;
 };
 
@@ -90,31 +97,21 @@ function removeRegistryOutput() {
   }
 }
 
-function resolveInstallPath(installPath: string, itemName: string) {
-  if (!installPath.endsWith(".json")) {
-    throw new Error(
-      `Registry item ${itemName} has invalid meta.installPath (must end with .json): ${installPath}`,
-    );
+function removeVersionedOutput() {
+  if (!existsSync(publicRoot)) {
+    return;
   }
-  if (installPath.includes("/") || installPath.includes("\\")) {
-    throw new Error(
-      `Registry item ${itemName} has invalid meta.installPath (must be a file name): ${installPath}`,
-    );
-  }
-  return installPath;
-}
 
-function copyInstallAlias(item: RegistryItem) {
-  const installPath = item.meta?.installPath;
-  if (!installPath) return;
-  if (typeof installPath !== "string") {
-    throw new Error(`Registry item ${item.name} has non-string meta.installPath.`);
+  const entries = readdirSync(publicRoot, { withFileTypes: true });
+  for (const entry of entries) {
+    if (!entry.isFile()) {
+      continue;
+    }
+
+    if (/\.v\d+\.json$/.test(entry.name)) {
+      rmSync(path.join(publicRoot, entry.name));
+    }
   }
-  const resolved = resolveInstallPath(installPath, item.name);
-  const source = path.join(publicRoot, `${item.name}.json`);
-  assertFileExists(source);
-  const destination = path.join(publicRoot, resolved);
-  copyFileSync(source, destination);
 }
 
 function copyRegistryFile(relativePath: string) {
@@ -136,6 +133,7 @@ assertNoInlineContent(registry.items);
 mkdirSync(publicRoot, { recursive: true });
 removeLegacyOutput();
 removeRegistryOutput();
+removeVersionedOutput();
 
 assertFileExists(path.join(publicRoot, "registry.json"));
 
@@ -145,7 +143,6 @@ for (const item of registry.items) {
   }
 
   assertFileExists(path.join(publicRoot, `${item.name}.json`));
-  copyInstallAlias(item);
 
   for (const file of item.files) {
     if (!file.path || typeof file.path !== "string") {

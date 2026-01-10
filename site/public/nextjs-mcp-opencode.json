@@ -25,8 +25,7 @@
       "config",
       "script"
     ],
-    "postInstall": "node .opencode/bin/merge-mcp.mjs",
-    "installPath": "nextjs-mcp-opencode.v1.json"
+    "postInstall": "node .opencode/bin/merge-mcp.mjs"
   },
   "docs": "After install, run `node .opencode/bin/merge-mcp.mjs` to merge the MCP config into opencode.json/jsonc. Requires Next.js 16+. The merge script archives payloads in .opencode/mcp/.applied to avoid re-adding removed MCPs. JSONC comments are stripped when writing.",
   "type": "registry:item"

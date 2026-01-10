@@ -42,8 +42,7 @@
       "agent",
       "command",
       "plugin"
-    ],
-    "installPath": "ralph-loop-opencode.v1.json"
+    ]
   },
   "docs": "Restart OpenCode after installing to register the /ralph command. Targets prefixed with ~ are repo-scoped (project-root) paths.",
   "type": "registry:item"
