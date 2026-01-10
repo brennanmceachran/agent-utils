@@ -1,12 +1,4 @@
-import {
-  copyFileSync,
-  existsSync,
-  mkdirSync,
-  readFileSync,
-  rmSync,
-  statSync,
-  writeFileSync,
-} from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, readFileSync, rmSync, statSync } from "node:fs";
 import path from "node:path";
 
 type RegistryFile = {
@@ -46,11 +38,6 @@ function readJson(filePath: string) {
     const message = error instanceof Error ? error.message : "Unknown JSON parse error";
     throw new Error(`Failed to parse ${filePath}: ${message}`);
   }
-}
-
-function writeJson(filePath: string, value: unknown) {
-  const json = `${JSON.stringify(value, null, 2)}\n`;
-  writeFileSync(filePath, json);
 }
 
 function assertFileExists(filePath: string) {
@@ -117,15 +104,17 @@ function resolveInstallPath(installPath: string, itemName: string) {
   return installPath;
 }
 
-function writeInstallAlias(item: RegistryItem) {
+function copyInstallAlias(item: RegistryItem) {
   const installPath = item.meta?.installPath;
   if (!installPath) return;
   if (typeof installPath !== "string") {
     throw new Error(`Registry item ${item.name} has non-string meta.installPath.`);
   }
   const resolved = resolveInstallPath(installPath, item.name);
+  const source = path.join(publicRoot, `${item.name}.json`);
+  assertFileExists(source);
   const destination = path.join(publicRoot, resolved);
-  writeJson(destination, item);
+  copyFileSync(source, destination);
 }
 
 function copyRegistryFile(relativePath: string) {
@@ -148,15 +137,15 @@ mkdirSync(publicRoot, { recursive: true });
 removeLegacyOutput();
 removeRegistryOutput();
 
-writeJson(path.join(publicRoot, "registry.json"), registry);
+assertFileExists(path.join(publicRoot, "registry.json"));
 
 for (const item of registry.items) {
   if (!item.name) {
     throw new Error("Registry item is missing a name.");
   }
 
-  writeJson(path.join(publicRoot, `${item.name}.json`), item);
-  writeInstallAlias(item);
+  assertFileExists(path.join(publicRoot, `${item.name}.json`));
+  copyInstallAlias(item);
 
   for (const file of item.files) {
     if (!file.path || typeof file.path !== "string") {

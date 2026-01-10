@@ -11,7 +11,7 @@
     "format": "biome format . --write",
     "format:check": "biome format .",
     "mcp:build": "bun build scripts/merge-mcp.ts --outfile registry/nextjs-mcp/opencode/files/bin/merge-mcp.mjs --format=esm --target=node",
-    "registry:build": "bun run mcp:build && bun run --bun scripts/build-registry.ts",
+    "registry:build": "bun run mcp:build && npx shadcn@latest build registry.json -o site/public && bun run --bun scripts/build-registry.ts",
     "registry:validate": "bun run --bun scripts/validate-registry.ts"
   },
   "devDependencies": {

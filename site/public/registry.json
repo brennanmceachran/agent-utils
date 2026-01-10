@@ -12,11 +12,7 @@
       "meta": {
         "concept": "ralph-loop",
         "platform": "opencode",
-        "kind": [
-          "agent",
-          "command",
-          "plugin"
-        ],
+        "kind": ["agent", "command", "plugin"],
         "installPath": "ralph-loop-opencode.v1.json"
       },
       "files": [
@@ -57,9 +53,7 @@
       "meta": {
         "concept": "webresearch",
         "platform": "opencode",
-        "kind": [
-          "tool"
-        ],
+        "kind": ["tool"],
         "installPath": "webresearch-opencode.v1.json"
       },
       "files": [
@@ -80,11 +74,7 @@
       "meta": {
         "concept": "nextjs-mcp",
         "platform": "opencode",
-        "kind": [
-          "mcp",
-          "config",
-          "script"
-        ],
+        "kind": ["mcp", "config", "script"],
         "postInstall": "node .opencode/bin/merge-mcp.mjs",
         "installPath": "nextjs-mcp-opencode.v1.json"
       },
