@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getTweet } from "react-tweet/api";
 
 import { PlatformTabs } from "@/components/platform-tabs";
 import { Badge } from "@/components/ui/badge";
@@ -10,93 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getConceptContent } from "@/lib/concept-content";
 import { buildHighlightedFiles, highlightSnippet } from "@/lib/highlight";
 import { buildInstallCommand, getBasePath, getDefaultOrigin } from "@/lib/install";
-import { getConceptBySlug, getConcepts, getItemsByConcept, readRegistryFile } from "@/lib/registry";
+import { getConceptBySlug, getConcepts, getItemsByConcept } from "@/lib/registry";
 import { cn } from "@/lib/utils";
-
-const MEDIA_TYPE = "video/mp4";
-
-type TweetResponse = Awaited<ReturnType<typeof getTweet>>;
-
-type TweetMedia = {
-  image?: string;
-  video?: string;
-};
-
-function extractTweetSource(overview: string) {
-  const urlMatch = overview.match(/<TweetEmbed[^>]*url=["']([^"']+)["']/);
-  const idMatch = overview.match(/<TweetEmbed[^>]*id=["']([^"']+)["']/);
-  const url = urlMatch?.[1];
-  const id = idMatch?.[1] ?? (url ? url.match(/status\/(\d+)/)?.[1] : undefined);
-
-  return { id, url };
-}
-
-function pickBestVideo(tweet: TweetResponse) {
-  const media = tweet?.mediaDetails?.find(
-    (item) => item.type === "video" || item.type === "animated_gif",
-  );
-  const mediaVariants = media?.video_info?.variants ?? [];
-  const tweetVariants = tweet?.video?.variants ?? [];
-
-  const mp4Variants = [
-    ...mediaVariants
-      .filter((variant) => variant.content_type === MEDIA_TYPE)
-      .map((variant) => ({ url: variant.url, bitrate: variant.bitrate ?? 0 })),
-    ...tweetVariants
-      .filter((variant) => variant.type === MEDIA_TYPE)
-      .map((variant) => ({ url: variant.src, bitrate: 0 })),
-  ];
-
-  if (!mp4Variants.length) {
-    return undefined;
-  }
-
-  const best = [...mp4Variants].sort((a, b) => b.bitrate - a.bitrate)[0];
-  return best?.url;
-}
-
-function pickPoster(tweet: TweetResponse) {
-  const poster = tweet?.video?.poster;
-  if (poster) {
-    return poster;
-  }
-
-  const media = tweet?.mediaDetails?.find((item) => item.type === "video");
-  if (media?.media_url_https) {
-    return media.media_url_https;
-  }
-
-  const photo = tweet?.photos?.[0]?.url;
-  if (photo) {
-    return photo;
-  }
-
-  const mediaPhoto = tweet?.mediaDetails?.find((item) => item.type === "photo");
-  return mediaPhoto?.media_url_https;
-}
-
-async function getTweetMedia(conceptSlug: string): Promise<TweetMedia | null> {
-  try {
-    const overview = readRegistryFile(`registry/${conceptSlug}/content/overview.mdx`);
-    const { id } = extractTweetSource(overview);
-
-    if (!id) {
-      return null;
-    }
-
-    const tweet = await getTweet(id);
-    if (!tweet) {
-      return null;
-    }
-
-    return {
-      image: pickPoster(tweet),
-      video: pickBestVideo(tweet),
-    };
-  } catch (error) {
-    return null;
-  }
-}
 
 export const dynamicParams = false;
 
@@ -125,8 +39,7 @@ export async function generateMetadata({
     `${resolvedBasePath}/registry/${concept.slug}/opengraph-image`,
     originUrl.origin,
   ).toString();
-  const tweetMedia = await getTweetMedia(concept.slug);
-  const imageUrls = [fallbackImage, tweetMedia?.image].filter(Boolean) as string[];
+  const imageUrls = [fallbackImage];
 
   return {
     referrer: "no-referrer",
@@ -142,7 +55,6 @@ export async function generateMetadata({
       type: "article",
       url: canonicalUrl,
       images: imageUrls.map((url) => ({ url })),
-      videos: tweetMedia?.video ? [{ url: tweetMedia.video, type: MEDIA_TYPE }] : undefined,
     },
     twitter: {
       card: "summary_large_image",
