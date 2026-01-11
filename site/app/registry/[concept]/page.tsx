@@ -36,7 +36,7 @@ export async function generateMetadata({
     basePath || originPath || (originUrl.hostname.endsWith(".github.io") ? githubBasePath : "");
   const canonicalUrl = new URL(`${resolvedBasePath}/registry/${concept.slug}/`, originUrl.origin);
   const fallbackImage = new URL(
-    `${resolvedBasePath}/registry/${concept.slug}/opengraph-image`,
+    `${resolvedBasePath}/registry/${concept.slug}/opengraph-image.png`,
     originUrl.origin,
   ).toString();
   const imageUrls = [fallbackImage];
